@@ -16,7 +16,7 @@ import skimage
 from skimage import feature
 import scipy
 pwd = os.getcwd()
-infile_query = pwd + "/*.jpg"
+infile_query = pwd + "/*d}.tif"
 files = (glob.glob(infile_query))
 files.sort()
 r_names=["r_" + str(s) for s in list(range(0, 256))]
@@ -26,7 +26,7 @@ x_names = ["x_" + str(x) for x in list(range(1, 101))]
 y_names = ["y_" + str(y) for y in list(range(1, 101))]
 s_names = x_names + y_names
 
-summary_table = pd.DataFrame(columns=['img_name', 'clone', 'rep', 'side', 'light', 'tuber', 'cmx', 'cmy', 'area', 'perimeter', 'length', 'width', 'ratio', 'eccentricity', 'red_ave', 'green_ave', 'blue_ave'])
+summary_table = pd.DataFrame(columns=['img_name', 'clone', 'rep', 'side', 'light', 'tuber', 'cmx', 'cmy', 'area', 'perimeter', 'length', 'width', 'ratio', 'eccentricity', 'red_ave', 'green_ave', 'blue_ave', 'red_sd', 'green_sd', 'blue_sd'])
 
 r_table = pd.DataFrame(columns=r_names)
 g_table = pd.DataFrame(columns=g_names)
@@ -36,7 +36,9 @@ s_table = pd.DataFrame(columns=s_names)
 for f in files:
     img = cv2.imread(f)
     image_name = f.split("/")[-1]
-    image_name = image_name.replace(".jpg", "")
+    image_name = image_name.replace(".tif", "")
+    image_name = image_name.split("}")[0]
+    image_name = image_name.replace("{fileName=", "")
     imgC = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     #plt.imshow(imgC)
     #plt.show()
@@ -58,7 +60,7 @@ for f in files:
     g = blur[:, :, 1]
     bl = blur[:, :, 2]
     #s_ret, s_th = cv2.threshold(s, 100, 255, cv2.THRESH_BINARY)
-    s_ret, s_th = cv2.threshold(s, 85, 255, cv2.THRESH_BINARY)
+    s_ret, s_th = cv2.threshold(s, 65, 255, cv2.THRESH_BINARY)
     b_ret_inv, b_th_inv = cv2.threshold(b, 125, 255, cv2.THRESH_BINARY_INV)
     chip_ret, chip_th = cv2.threshold(b, 140, 255, cv2.THRESH_BINARY)
     mask = cv2.bitwise_and(s_th, b_th_inv)
@@ -116,5 +118,5 @@ summary_table = pd.concat([summary_table, g_table], axis =1)
 summary_table = pd.concat([summary_table, b_table], axis =1)
 summary_table = pd.concat([summary_table, s_table], axis =1)
 # out_table_path = outfile_path + "/test_potato_measurements.csv"
-out_table_path = pwd + "/A08241_potato_measurements_std_shape.csv"
+out_table_path = pwd + "/A08241_potato_measurements_std_shape_ColorCorrected_2022-02-09.csv"
 summary_table.to_csv(out_table_path, mode='a', header=True, encoding='utf-8')

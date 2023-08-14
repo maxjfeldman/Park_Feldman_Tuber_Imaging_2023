@@ -14,24 +14,32 @@ import glob
 import pandas as pd
 import skimage
 from skimage import feature
+import scipy
 pwd = os.getcwd()
-infile_query = pwd + "/*.jpg"
+infile_query = pwd + "/*d}.tif"
 files = (glob.glob(infile_query))
 files.sort()
 r_names=["r_" + str(s) for s in list(range(0, 256))]
 g_names=["g_" + str(s) for s in list(range(0, 256))]
 b_names=["b_" + str(s) for s in list(range(0, 256))]
+x_names = ["x_" + str(x) for x in list(range(1, 101))]
+y_names = ["y_" + str(y) for y in list(range(1, 101))]
+s_names = x_names + y_names
 
-summary_table = pd.DataFrame(columns=['img_name', 'clone', 'rep', 'side', 'light', 'tuber', 'cmx', 'cmy', 'area', 'perimeter', 'length', 'width', 'ratio', 'eccentricity', 'red_ave', 'green_ave', 'blue_ave'])
+summary_table = pd.DataFrame(columns=['img_name', 'clone', 'rep', 'side', 'light', 'tuber', 'cmx', 'cmy', 'area', 'perimeter', 'length', 'width', 'ratio', 'eccentricity', 'red_ave', 'green_ave', 'blue_ave', 'red_sd', 'green_sd', 'blue_sd'])
 
 r_table = pd.DataFrame(columns=r_names)
 g_table = pd.DataFrame(columns=g_names)
 b_table = pd.DataFrame(columns=b_names)
+s_table = pd.DataFrame(columns=s_names)
+
 
 for f in files:
     img = cv2.imread(f)
     image_name = f.split("/")[-1]
-    image_name = image_name.replace(".jpg", "")
+    image_name = image_name.replace(".tif", "")
+    image_name = image_name.split("}")[0]
+    image_name = image_name.replace("{fileName=", "")
     imgC = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     #plt.imshow(imgC)
     #plt.show()
@@ -42,7 +50,7 @@ for f in files:
     #imgL = cv2.line(imgL, (0, 3700), (6000, 3700), (0, 0, 255), 10)
     #215: 2600, 1500: 5050
     #imgM = imgC[0:1900,1200:4700]
-    img_crop = imgC[1900:3700, 1650:4400]
+    img_crop = imgC[0:1900, 1650:4400]
     ix, iy, iz = np.shape(img)
     blur = cv2.GaussianBlur(img_crop, (5, 5), 3)
     imgHSV = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
@@ -52,16 +60,16 @@ for f in files:
     r = blur[:, :, 0]
     g = blur[:, :, 1]
     bl = blur[:, :, 2]
-    s_ret, s_th = cv2.threshold(s, 80, 255, cv2.THRESH_BINARY)
+    s_ret, s_th = cv2.threshold(s, 65, 255, cv2.THRESH_BINARY)
     b_ret_inv, b_th_inv = cv2.threshold(b, 125, 255, cv2.THRESH_BINARY_INV)
     chip_a_ret, chip_a_th = cv2.threshold(a, 150, 255, cv2.THRESH_BINARY)
     chip_b_ret, chip_b_th = cv2.threshold(b, 150, 255, cv2.THRESH_BINARY)
     chip_mask = cv2.bitwise_and(chip_a_th, chip_b_th)
     mask = cv2.bitwise_and(s_th, b_th_inv)
     kernel = np.ones((5, 5), np.uint8)
-    mask_er = cv2.erode(mask, kernel, iterations=5)
+    mask_er = cv2.erode(mask, kernel, iterations=1)
     #chip_er = cv2.erode(chip_th, kernel, iterations=3)
-    mask_dil = cv2.dilate(mask_er, kernel, iterations=3)
+    mask_dil = cv2.dilate(mask_er, kernel, iterations=1)
     #chip_dil = cv2.dilate(chip_er, kernel, iterations=5)
     contours, hierarchy = cv2.findContours(mask_dil, cv2.RETR_TREE, cv2.cv2.CHAIN_APPROX_NONE)
     chip_contour, chip_hierarchy = cv2.findContours(chip_mask, cv2.RETR_TREE, cv2.cv2.CHAIN_APPROX_NONE)
@@ -99,15 +107,18 @@ for f in files:
     img_draw = img_crop.copy()
     contours2.append(chip_contour)
     ## This subroutine is where the values are measured
-    summary, r_values, g_values, b_values = get_A08241_measurements(cnt_order, contours2, img_draw, image_name)
+    summary, r_values, g_values, b_values, s_values = get_A08241_measurements(cnt_order, contours2, img_draw, image_name)
     summary_table =  summary_table.append(summary, )
     r_table =  r_table.append(r_values, )
     g_table =  g_table.append(g_values, )
     b_table =  b_table.append(b_values, )
+    s_table =  s_table.append(s_values, )
 
 summary_table = pd.concat([summary_table, r_table], axis =1)
 summary_table = pd.concat([summary_table, g_table], axis =1)
 summary_table = pd.concat([summary_table, b_table], axis =1)
+summary_table = pd.concat([summary_table, s_table], axis =1)
+
 # out_table_path = outfile_path + "/test_potato_measurements.csv"
-out_table_path = pwd + "/A08241_potato_measurements_box.csv"
+out_table_path = pwd + "/A08241_potato_measurements_box_shape_ColorCorrected_2022-02-09.csv"
 summary_table.to_csv(out_table_path, mode='a', header=True, encoding='utf-8')

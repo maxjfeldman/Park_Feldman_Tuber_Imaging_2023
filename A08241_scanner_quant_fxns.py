@@ -1,6 +1,5 @@
 def get_A08241_measurements_scanner(cnt_order, contours, img_draw, img_name):
-    ## Note this will be different on your computer
-    ##output_dir = '/Users/max.feldman/Documents/data/2020/A08241_imgs/scanner/output/'
+    output_dir = '/Users/max.feldman/Documents/data/scanner/output/'
     output_file_name = output_dir + "output_" + img_name + ".jpg"
     img_write = img_draw.copy()
     clone, rep = image_name.split("_")
@@ -61,26 +60,26 @@ def get_A08241_measurements_scanner(cnt_order, contours, img_draw, img_name):
         centerpoint, cpoint_h = cv2.findContours(centerp_binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)[-2:]
         dist = []
         vhull = np.vstack(hull)
-        for i, c in enumerate(vhull):
-            xy = tuple(c)
-            pptest = cv2.pointPolygonTest(centerpoint[0], xy, measureDist=True)
-            dist.append(pptest)
-        abs_dist = np.absolute(dist)
-        max_i = np.argmax(abs_dist)
-        caliper_max_x, caliper_max_y = list(tuple(vhull[max_i]))
-        caliper_mid_x, caliper_mid_y = [int(cmx), int(cmy)]
-        xdiff = float(caliper_max_x - caliper_mid_x)
-        ydiff = float(caliper_max_y - caliper_mid_y)
-        slope = 1
-        if xdiff != 0:
-            slope = (float(ydiff / xdiff))
-        b_line = caliper_mid_y - (slope * caliper_mid_x)
-        if slope != 0:
-            xintercept = int(-b_line / slope)
-            xintercept1 = int((ix - b_line) / slope)
-            if 0 <= xintercept <= iy and 0 <= xintercept1 <= iy:
-                cv2.line(background1, (xintercept1, ix), (xintercept, 0), (255), 3)
-            elif xintercept < 0 or xintercept > iy or xintercept1 < 0 or xintercept1 > iy:
+        #for i, c in enumerate(vhull):
+        #    xy = tuple(c)
+        #    pptest = cv2.pointPolygonTest(centerpoint[0], xy, measureDist=True)
+        #    dist.append(pptest)
+        #abs_dist = np.absolute(dist)
+        #max_i = np.argmax(abs_dist)
+        #caliper_max_x, caliper_max_y = list(tuple(vhull[max_i]))
+        #caliper_mid_x, caliper_mid_y = [int(cmx), int(cmy)]
+        #xdiff = float(caliper_max_x - caliper_mid_x)
+        #ydiff = float(caliper_max_y - caliper_mid_y)
+        #slope = 1
+        #if xdiff != 0:
+        #    slope = (float(ydiff / xdiff))
+        #b_line = caliper_mid_y - (slope * caliper_mid_x)
+        #if slope != 0:
+        #    xintercept = int(-b_line / slope)
+        #    xintercept1 = int((ix - b_line) / slope)
+        #    if 0 <= xintercept <= iy and 0 <= xintercept1 <= iy:
+        #        cv2.line(background1, (xintercept1, ix), (xintercept, 0), (255), 3)
+        #    elif xintercept < 0 or xintercept > iy or xintercept1 < 0 or xintercept1 > iy:
                 # Used a random number generator to test if either of these cases were possible but neither is possible
                 # if xintercept < 0 and 0 <= xintercept1 <= iy:
                 #     yintercept = int(b_line)
@@ -95,11 +94,11 @@ def get_A08241_measurements_scanner(cnt_order, contours, img_draw, img_name):
                 #     yintercept1 = int((slope * iy) + b_line)
                 #     cv2.line(background1, (iy, yintercept1), (xintercept, 0), (255), 5)
                 # else:
-                yintercept = int(b_line)
-                yintercept1 = int((slope * iy) + b_line)
-                cv2.line(background1, (0, yintercept), (iy, yintercept1), (255), 5)
-        else:
-            cv2.line(background1, (iy, caliper_mid_y), (0, caliper_mid_y), (255), 3)
+        #        yintercept = int(b_line)
+        #        yintercept1 = int((slope * iy) + b_line)
+        #        cv2.line(background1, (0, yintercept), (iy, yintercept1), (255), 5)
+        #else:
+        #    cv2.line(background1, (iy, caliper_mid_y), (0, caliper_mid_y), (255), 3)
         ret1, line_binary = cv2.threshold(background1, 0, 255, cv2.THRESH_BINARY)
         # print_image(line_binary,(str(device)+'_caliperfit.png'))
         cv2.drawContours(background2, [hull], -1, (255), -1)
@@ -143,8 +142,8 @@ def get_A08241_measurements_scanner(cnt_order, contours, img_draw, img_name):
         cv2.drawContours(img_out, cnt, -1, (255, 165, 0), 15)
         #cv2.line(img_out, (x, y), (x + width, y), (255, 0, 0), 3)
         #cv2.line(img_out, (int(cmx), y), (int(cmx), y + height), (100, 255, 0), 3)
-        cv2.circle(img_out, (int(cmx), int(cmy)), 10, (255, 0, 0), 10)
-        cv2.line(img_out, (tuple(caliper_transpose[caliper_length - 1])), (tuple(caliper_transpose[0])), (255, 0, 0), 10)
+        #cv2.circle(img_out, (int(cmx), int(cmy)), 10, (255, 0, 0), 10)
+        #cv2.line(img_out, (tuple(caliper_transpose[caliper_length - 1])), (tuple(caliper_transpose[0])), (255, 0, 0), 10)
         #plt.imshow(img_out)
         #plt.show()
         #img_2_6_name = output_write_directory + "/2_" + str(counter) + "_" + str(plot_number) + "_" + image_name + ".jpg"
@@ -161,14 +160,22 @@ def get_A08241_measurements_scanner(cnt_order, contours, img_draw, img_name):
         g_table = g_table.append(g_row, )
         b_table = b_table.append(b_row, )
         ratio = major_axis_length / minor_axis_length
-        obj_color_ave = cv2.mean(img_write, mask=tuber_mask)
+        #obj_color_ave = cv2.mean(img_write, mask=tuber_mask)
         # print(obj_color_ave)
+        #r_ave = obj_color_ave[0]
+        #g_ave = obj_color_ave[1]
+        #b_ave = obj_color_ave[2]
+        #tuber = tuber_no[counter]
+        obj_color_ave, obj_color_std = cv2.meanStdDev(img_write, mask=tuber_mask)
         r_ave = obj_color_ave[0]
         g_ave = obj_color_ave[1]
         b_ave = obj_color_ave[2]
+        r_std = obj_color_std[0]
+        g_std = obj_color_std[1]
+        b_std = obj_color_std[2]
         tuber = tuber_no[counter]
-        temp = [img_name, clone, rep, tuber, cmx, cmy, area, perimeter, major_axis_length, minor_axis_length, ratio, eccentricity,r_ave, g_ave, b_ave]
-        temp = pd.DataFrame([temp], columns=['img_name', 'clone', 'rep', 'tuber','cmx', 'cmy', 'area', 'perimeter', 'length', 'width', 'ratio', 'eccentricity', 'red_ave', 'green_ave', 'blue_ave'])
+        temp = [img_name, clone, rep, tuber, cmx, cmy, area, perimeter, major_axis_length, minor_axis_length, ratio, eccentricity,r_ave, g_ave, b_ave, r_std, g_std, b_std]
+        temp = pd.DataFrame([temp], columns=['img_name', 'clone', 'rep', 'tuber','cmx', 'cmy', 'area', 'perimeter', 'length', 'width', 'ratio', 'eccentricity', 'red_ave', 'green_ave', 'blue_ave', 'red_sd', 'green_sd', 'blue_sd'])
         #print(temp)
         summary_table = summary_table.append(temp, )
         counter += 1
@@ -177,9 +184,8 @@ def get_A08241_measurements_scanner(cnt_order, contours, img_draw, img_name):
     return summary_table, r_table, g_table, b_table
 
 def rotate_and_save_tuber_A08241(cnt, tuber_no, masked_tuber, img_mask, image_name):
-    ## Note this will be different on your computer
-    #masked_output_dir = '/Users/max.feldman/Documents/data/2020/A08241_imgs/scanner/output_nc/masked/'
-    #binary_output_dir = '/Users/max.feldman/Documents/data/2020/A08241_imgs/scanner/output_nc/binary/'
+    masked_output_dir = '/Users/max.feldman/Documents/data/scanner/output_nc/masked/'
+    binary_output_dir = '/Users/max.feldman/Documents/data/scanner/output_nc/binary/'
     clone, rep = image_name.split("_")
     output_file_name_masked = masked_output_dir + image_name + "_" + str(tuber_no) + "_masked.jpg"
     output_file_name_binary = binary_output_dir + image_name + "_" + str(tuber_no) + "_binary.jpg"
@@ -208,6 +214,8 @@ def rotate_and_save_tuber_A08241(cnt, tuber_no, masked_tuber, img_mask, image_na
     ## Lets make the image a square to maintain aspect ratio
     pad_needed_v = 1900 - h
     pad_needed_h = 1900 - w
+    pad_needed_v = abs(pad_needed_v)
+    pad_needed_h = abs(pad_needed_h)
     ## pad vertical height first
     if (pad_needed_v % 2) == 0:
         pad_val_u = pad_needed_v / 2

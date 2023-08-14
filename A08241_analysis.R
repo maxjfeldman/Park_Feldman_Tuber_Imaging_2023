@@ -13,6 +13,8 @@ library(corrplot)
 library(ggpmisc)
 library(ggpubr)
 library(GGally)
+library(grDevices)
+library(farver)
 
 
 ##########################################################################################
@@ -132,28 +134,76 @@ get_fx_scan<-function(data){
 
 
 
+
 ##########################################################################################
 ## Load data
 ##########################################################################################
 
 ## Define directories used and read in data
-setwd("/Users/max.feldman/Desktop/A08241")
+setwd("/Users/max.feldman/Documents/data/analysis_test")
 base.dir<-getwd()
 
 ## Black background
-std.filepath<-paste(base.dir, "/A08241_potato_measurements_std_shape.csv", sep="")
+std.filepath<-paste(base.dir, "/A08241_potato_measurements_std_shape_ColorCorrected.csv", sep="")
 std<-read.csv(std.filepath)
-std_color<-std[2:786]
+std$red_ave<-gsub("\\[", "", std$red_ave)
+std$red_ave<-gsub("\\]", "", std$red_ave)
+std$red_ave<-as.numeric(as.character(std$red_ave))
+
+std$green_ave<-gsub("\\[", "", std$green_ave)
+std$green_ave<-gsub("\\]", "", std$green_ave)
+std$green_ave<-as.numeric(as.character(std$green_ave))
+
+std$blue_ave<-gsub("\\[", "", std$blue_ave)
+std$blue_ave<-gsub("\\]", "", std$blue_ave)
+std$blue_ave<-as.numeric(as.character(std$blue_ave))
+
+std$red_sd<-gsub("\\[", "", std$red_sd)
+std$red_sd<-gsub("\\]", "", std$red_sd)
+std$red_sd<-as.numeric(as.character(std$red_sd))
+
+std$green_sd<-gsub("\\[", "", std$green_sd)
+std$green_sd<-gsub("\\]", "", std$green_sd)
+std$green_sd<-as.numeric(as.character(std$green_sd))
+
+std$blue_sd<-gsub("\\[", "", std$blue_sd)
+std$blue_sd<-gsub("\\]", "", std$blue_sd)
+std$blue_sd<-as.numeric(as.character(std$blue_sd))
+std_color<-std[,c(2:21)]
 
 ## Extract shape values to seperate data.frame
-shape<-std[,c(2:18, 787:ncol(std))]
+shape<-std[,c(2:21,790:889)]
 
 ## Get standard values from black background
-std<-std[,c(1:786)]
+#std<-std[,c(1:789)]
 
 ## Lightbox background
-box.filepath<-paste(base.dir, "/A08241_potato_measurements_box.csv", sep="")
+box.filepath<-paste(base.dir, "/A08241_potato_measurements_box_shape_ColorCorrected.csv", sep="")
 box<-read.csv(box.filepath)
+box$red_ave<-gsub("\\[", "", box$red_ave)
+box$red_ave<-gsub("\\]", "", box$red_ave)
+box$red_ave<-as.numeric(as.character(box$red_ave))
+
+box$green_ave<-gsub("\\[", "", box$green_ave)
+box$green_ave<-gsub("\\]", "", box$green_ave)
+box$green_ave<-as.numeric(as.character(box$green_ave))
+
+box$blue_ave<-gsub("\\[", "", box$blue_ave)
+box$blue_ave<-gsub("\\]", "", box$blue_ave)
+box$blue_ave<-as.numeric(as.character(box$blue_ave))
+
+box$red_sd<-gsub("\\[", "", box$red_sd)
+box$red_sd<-gsub("\\]", "", box$red_sd)
+box$red_sd<-as.numeric(as.character(box$red_sd))
+
+box$green_sd<-gsub("\\[", "", box$green_sd)
+box$green_sd<-gsub("\\]", "", box$green_sd)
+box$green_sd<-as.numeric(as.character(box$green_sd))
+
+box$blue_sd<-gsub("\\[", "", box$blue_sd)
+box$blue_sd<-gsub("\\]", "", box$blue_sd)
+box$blue_sd<-as.numeric(as.character(box$blue_sd))
+
 
 ## Combine datasets
 both<-rbind(std, box)
@@ -161,6 +211,32 @@ both<-rbind(std, box)
 ## Load in scanner measurements
 scan.filepath<-paste(base.dir, "/A08241_potato_measurements_scanner.csv", sep="")
 scan<-read.csv(scan.filepath)
+
+scan$red_ave<-gsub("\\[", "", scan$red_ave)
+scan$red_ave<-gsub("\\]", "", scan$red_ave)
+scan$red_ave<-as.numeric(as.character(scan$red_ave))
+
+scan$green_ave<-gsub("\\[", "", scan$green_ave)
+scan$green_ave<-gsub("\\]", "", scan$green_ave)
+scan$green_ave<-as.numeric(as.character(scan$green_ave))
+
+scan$blue_ave<-gsub("\\[", "", scan$blue_ave)
+scan$blue_ave<-gsub("\\]", "", scan$blue_ave)
+scan$blue_ave<-as.numeric(as.character(scan$blue_ave))
+
+scan$red_sd<-gsub("\\[", "", scan$red_sd)
+scan$red_sd<-gsub("\\]", "", scan$red_sd)
+scan$red_sd<-as.numeric(as.character(scan$red_sd))
+
+scan$green_sd<-gsub("\\[", "", scan$green_sd)
+scan$green_sd<-gsub("\\]", "", scan$green_sd)
+scan$green_sd<-as.numeric(as.character(scan$green_sd))
+
+scan$blue_sd<-gsub("\\[", "", scan$blue_sd)
+scan$blue_sd<-gsub("\\]", "", scan$blue_sd)
+scan$blue_sd<-as.numeric(as.character(scan$blue_sd))
+
+scan<-scan[,c(2:19)]
 
 ## Load in ground truth data
 gt.filepath<-paste(base.dir, "/ground_truth_data.csv", sep="")
@@ -191,11 +267,12 @@ marker.scan<-marker.scan[,-which(names(marker.scan) %in% c("X","img_name"))]
 ## Lets only keep the images from side 1 because the scanner images only contain a single side
 marker.top_down.s1<-marker.top_down[marker.top_down$side == '1',]
 marker.top_down.s1<-marker.top_down.s1[,-which(names(marker.top_down.s1) %in% c("side"))]
+marker.top_down.s1<-marker.top_down.s1[,c(1:18)]
 
 ## Lets add a categorical variable named 'light' to the scan data.frame 
 ## This identifies the collection platform
 marker.scan$light<-rep("scanner", nrow(marker.scan))
-marker.scan<-marker.scan[names(marker.top_down.s1)]
+marker.scan<-marker.scan[,names(marker.top_down.s1)]
 
 ## Lets make sure the column order are the same between the top-down and scan data.frames
 ## Then merge them using rbind
@@ -206,15 +283,18 @@ marker.all$mm_per_px<-37/marker.all$length
 marker.all$length_mm<-marker.all$length * marker.all$mm_per_px
 marker.all$width_mm<-marker.all$width * marker.all$mm_per_px
 #marker.all$pct_area<-marker.all$area/mean(marker.all$area)
-marker.all$rel_area<-marker.all$area * marker.all$mm_per_px
+marker.all$rel_area<-marker.all$area * (marker.all$mm_per_px)^2
 marker.all$light<-as.character(marker.all$light)
 marker.all[marker.all$light == "std", "light"]<-c("Black background")
 marker.all[marker.all$light == "box", "light"]<-c("Illumination box")
 marker.all[marker.all$light == "scanner", "light"]<-c("Flatbed scanner")
 
 
+
+
 ## Subset data.frame and convert to long form
 marker.all<-marker.all[,c("clone", "rep", "light", "tuber", "area", "rel_area", "length", "length_mm", "width", "width_mm", "ratio")]
+
 
 id.vars<-colnames(marker.all)[c(1:4)]
 measure.vars<-colnames(marker.all)[c(5:(ncol(marker.all)))]
@@ -257,7 +337,7 @@ width_mm<-marker.all_long[marker.all_long$Trait == 'width_mm',]
 
 p<-ggplot(width_mm, aes(x=Configuration, y=Value, col=Configuration)) + geom_jitter(size = 0.1, width=0.02, height=0) + theme_bw()
 x<-p + stat_summary(fun.y="mean", geom="point", size=6, shape=4, col="black") + scale_color_manual(values = c("red", "blue", "black"))
-q<-x +  stat_summary(fun.data=mean_se, geom = "errorbar", width=0.2) + theme(text = element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none")  + ylab("Distance (mm2)") + xlab("")
+q<-x +  stat_summary(fun.data=mean_se, geom = "errorbar", width=0.2) + theme(text = element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none")  + ylab("Distance (mm)") + xlab("")
 
 fig.S1b_path<-paste(fig.filepath, "/Fig_S1b.pdf", sep="")
 pdf(fig.S1b_path, height=6, width=6)
@@ -341,12 +421,12 @@ for (i in imgs){
 
 
 ## Get px_per_mm for each img
-std$area_mm<-std$area * std$px_per_mm
+std$area_mm<-std$area * (std$px_per_mm)^2
 std$length_mm<-std$length * std$px_per_mm
 std$width_mm<-std$width * std$px_per_mm
 std$perimeter_mm<-std$perimeter * std$px_per_mm
 
-std_size<-std[,c("img_name", "clone", "rep", "side", "tuber", "area", "perimeter", "length", "width", "ratio", "eccentricity", "red_ave", "green_ave", "blue_ave", "area_mm", "length_mm", "width_mm","perimeter_mm")]
+std_size<-std[,c("img_name", "clone", "rep", "side", "tuber", "area", "perimeter", "length", "width", "ratio", "eccentricity", "red_ave", "green_ave", "blue_ave", "red_sd", "green_sd", "blue_sd", "area_mm", "length_mm", "width_mm","perimeter_mm")]
 std_size<-std_size[std_size$tuber != 'marker',]
 
 ## Lets get the measurements only from side 1
@@ -380,11 +460,11 @@ side.var<-re[3]/tot.var
 
 ## Lets calculate some summary statistics on the size measurements 
 ## Average
-tuber_size.ave<-aggregate(.~ clone, data=tuber_size[,c(1,3:16)], mean)
+tuber_size.ave<-aggregate(.~ clone, data=tuber_size[,c(1,3:22)], mean)
 colnames(tuber_size.ave)[2:ncol(tuber_size.ave)]<-paste(colnames(tuber_size.ave[2:ncol(tuber_size.ave)]), "ave", sep=".")
 
 ## Standard deviation
-tuber_size.sd<-aggregate(.~ clone, data=tuber_size[,c(1,3:16)], sd)
+tuber_size.sd<-aggregate(.~ clone, data=tuber_size[,c(1,3:22)], sd)
 colnames(tuber_size.sd)[2:ncol(tuber_size.sd)]<-paste(colnames(tuber_size.sd[2:ncol(tuber_size.sd)]), "sd", sep=".")
 
 ## Lets merge these parameters into the same data.frame
@@ -408,20 +488,21 @@ clone.ave.max<-max(tuber_size.par$weight.ave)
 clone.ave.sd/clone.ave
 
 ## Lets cacluation broad sense H2 for size measurements
-tuber_size_for_h2<-tuber_size[,c(1,2,12:14,16,18:19)]
+tuber_size_for_h2<-tuber_size[,c(1:22)]
 
 h2_tuber.size<-get_h2(tuber_size_for_h2)
 
 ## Lets do the same for tuber size variance
-tuber_sd_for_h2<-tuber_size[,c(1:3,12:14,16,18:20)]
-tuber_sd_for_h2<-aggregate(.~ clone + replicate, data=tuber_sd_for_h2, sd)
+tuber_sd_for_h2<-tuber_size[,c(1:22)]
+#tuber_sd_for_h2<-aggregate(.~ clone + replicate, data=tuber_sd_for_h2, sd)
+tuber_sd_for_h2<-aggregate(.~ clone, data=tuber_sd_for_h2, sd)
 tuber_sd_for_h2<-tuber_sd_for_h2[,-c(2,3)]
 
 h2_tuber.size.sd<-get_h2(tuber_sd_for_h2)
 
-## Make plots of correlation between computer vision and ground truth measurements
-#p<-ggplot(tuber_size, aes(x=caliper_length, y=length_mm)) + geom_point(size=0.5, color=brown"") + theme_bw() + xlab("Caliper length (mm)") + ylab("Computer vision length (mm)") + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="red",linetype="dashed") + stat_cor(aes(size = 2, label =  ..rr.label..))
-p<-ggplot(tuber_size, aes(x=caliper_length, y=length_mm)) + geom_point(size=0.5, color="grey60") + theme_bw() + xlab("Caliper length (mm)") + ylab("Computer vision length (mm)") + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+## Make plots of correlation between machine vision and ground truth measurements
+#p<-ggplot(tuber_size, aes(x=caliper_length, y=length_mm)) + geom_point(size=0.5, color=brown"") + theme_bw() + xlab("Caliper length (mm)") + ylab("Machine vision length (mm)") + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="red",linetype="dashed") + stat_cor(aes(size = 2, label =  ..rr.label..))
+p<-ggplot(tuber_size, aes(x=caliper_length, y=length_mm)) + geom_point(size=0.5, color="grey30") + theme_bw() + xlab("Caliper length (mm)") + ylab("Machine vision length (mm)") + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
 
 fig.1b_path<-paste(fig.filepath, "/Fig_1b.pdf", sep="")
 pdf(fig.1b_path, height=4, width=4)
@@ -430,13 +511,15 @@ dev.off()
 
 fig.1c_path<-paste(fig.filepath, "/Fig_1c.pdf", sep="")
 
-p<-ggplot(tuber_size, aes(x=caliper_width, y=width_mm)) + geom_point(size=0.5, color="grey90") + theme_bw() + xlab("Caliper width (mm)") + ylab("Computer vision width (mm)")  + theme(text = element_text(size=15),legend.position = "none")+ geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-ggplot(tuber_size, aes(x=caliper_width, y=width_mm)) + geom_point(size=0.5, color="grey50") + theme_bw() + xlab("Caliper width (mm)") + ylab("Machine vision width (mm)")  + theme(text = element_text(size=15),legend.position = "none")+ geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+
+
 pdf(fig.1c_path, height=4, width=4)
 print(p)
 dev.off()
 
 fig.1a_path<-paste(fig.filepath, "/Fig_1a.pdf", sep="")
-p<-ggplot(tuber_size, aes(x=weight, y=area_mm)) + geom_point(size=0.5, color=c("grey30")) + theme_bw() + xlab("Weight (oz)") + ylab("Area (mm2)")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-ggplot(tuber_size, aes(x=weight, y=area_mm)) + geom_point(size=0.5, color=c("grey10")) + theme_bw() + xlab("Weight (oz)") + ylab("Area (mm2)")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
 
 pdf(fig.1a_path, height=4, width=4)
 print(p)
@@ -448,15 +531,96 @@ tuber_size$clone = reorder(tuber_size$clone, tuber_size$weight, median)
 p<-ggplot(tuber_size, aes(x=as.factor(clone), y=weight), color="sienna4") + geom_boxplot() + theme_bw() + xlab("Clone") + ylab("Tuber size (oz)")  + theme(text = element_text(size=15),legend.position = "none",axis.text.x = element_text(angle = 90, hjust = 1, size=6))
 
 fig.1d_path<-paste(fig.filepath, "/Fig_1d.pdf", sep="")
+
 pdf(fig.1d_path, height=3, width=14)
 print(p)
 dev.off()
 
 
 
-std_size.model<-std_size[,c(2:4,15:ncol(std_size))]
-size.variance_output<-get_fx(std_size)
+std_size.model<-std_size[,c(2:4,18:ncol(std_size))]
+size.variance_output<-get_fx(std_size.model)
 
+
+## Lets look at correlation of measurements between each tuber side
+side1<-std_size[std_size$side == 1,c(2:5,18:21)]
+side2<-std_size[std_size$side == 2,c(2:5,18:21)]
+colnames(side1)[c(5:ncol(side1))]<-paste(colnames(side1)[c(5:ncol(side1))], "1", sep="_")
+colnames(side2)[c(5:ncol(side2))]<-paste(colnames(side2)[c(5:ncol(side2))], "2", sep="_")
+
+stds_size_compareSides<-merge(side1[,-c(3)], side2[,-c(3)], by=c('clone', 'rep', 'tuber'), all=T)
+stds_size_compareSides<-stds_size_compareSides[complete.cases(stds_size_compareSides),]
+
+area.cor<-cor(stds_size_compareSides$area_mm_1, stds_size_compareSides$area_mm_2)
+length.cor<-cor(stds_size_compareSides$length_mm_1, stds_size_compareSides$length_mm_2)
+width.cor<-cor(stds_size_compareSides$width_mm_1, stds_size_compareSides$width_mm_2)
+perimeter.cor<-cor(stds_size_compareSides$perimeter_mm_1, stds_size_compareSides$perimeter_mm_2)
+
+p<-ggplot(stds_size_compareSides, aes(x=area_mm_1, y=area_mm_2)) + geom_point() + theme_bw() + xlab("Area (mm2): Tuber side 1") +  ylab("Area (mm2): Tuber side 2")
+p<-ggplot(stds_size_compareSides, aes(x=length_mm_1, y=length_mm_2)) + geom_point() + theme_bw() + xlab("Length (mm): Tuber side 1") +  ylab("Length (mm): Tuber side 2")
+
+
+
+## Lets look at standard error for different sample sizes
+
+## First step is to identify samples with 10 tubers
+
+complete.clones<-names(table(tuber_size$clone)[table(tuber_size$clone) > 9])
+tuber_size_complete<-tuber_size[tuber_size$clone %in% complete.clones,]
+
+tuber_size_complete.z<-apply(tuber_size_complete[,c(3:22)], 2, scale)
+tuber_size_complete.z<-cbind(tuber_size_complete[,c(1:2)], tuber_size_complete.z)
+
+std_error_size<-c()
+for(i in 3:10){
+  clones<-unique(tuber_size_complete$clone)
+  for (c in clones){
+    clone.dat<-tuber_size_complete.z[tuber_size_complete.z$clone == c,]
+    tubers<-sample(c(1:10), i, replace=F)
+    small.dat<-clone.dat[clone.dat$tuber %in% tubers, ]
+    weight.sd.err<-std.error(small.dat$weight)
+    area.sd.err<-std.error(small.dat$area_mm)
+    length.sd.err<-std.error(small.dat$length_mm)
+    width.sd.err<-std.error(small.dat$width_mm)
+    perimeter.sd.err<-std.error(small.dat$perimeter_mm)
+    caliper_L.sd.err<-std.error(small.dat$caliper_length)
+    caliper_W.sd.err<-std.error(small.dat$caliper_width)
+    temp<-c(i,c,weight.sd.err,area.sd.err,length.sd.err, width.sd.err, perimeter.sd.err,caliper_L.sd.err,caliper_W.sd.err)
+    std_error_size<-rbind(std_error_size, temp)
+  }
+}
+
+std_error_size<-as.data.frame(std_error_size)
+colnames(std_error_size)<-c("Replicates", "Clone", "Weight","Area","Length","Width","Perimeter","Caliper Length", "Caliper Width")
+
+for(i in 1:ncol(std_error_size)){
+  std_error_size[,i]<-as.numeric(as.character(std_error_size[,i]))
+}
+
+std_error_size.ag<-aggregate(.~Replicates, data=std_error_size[,-c(2)], mean)
+
+id.vars<-colnames(std_error_size.ag)[c(1)]
+measure.vars<-colnames(std_error_size.ag)[c(2:(ncol(std_error_size.ag)))]
+std_error_size.ag.long<-melt(std_error_size.ag,
+                    # ID variables - all the variables to keep but not split apart on
+                    id.vars=id.vars,
+                    # The source columns
+                    measure.vars=measure.vars,
+                    # Name of the destination column that will identify the original
+                    # column that the measurement came from
+                    variable.name="Trait",
+                    value.name="SE"
+)
+
+
+p<-ggplot(std_error_size.ag.long, aes(x=Replicates, y=SE, color=Trait)) + geom_line() + theme_bw()
+q<-p+geom_point() + xlab("Number of tubers") + ylab("Standard Error")
+
+
+#fig.S3a_path<-paste(fig.filepath, "/Fig_S3a.pdf", sep="")
+#pdf(fig.1d_path, height=8, width=5)
+#print(p)
+#dev.off()
 
 ##########################################################################################
 ## Analysis of size standard shape on black background
@@ -484,6 +648,7 @@ sd(marker_shape$eccentricity)
 
 tuber_shape<-tuber_size
 
+
 ## Calculate L/W ratio as measured by calipers
 tuber_shape$caliper_ratio<-tuber_shape$caliper_length/tuber_shape$caliper_width
 
@@ -497,7 +662,7 @@ cor(tuber_shape$ratio, tuber_shape$eccentricity, use="complete.obs")
 ## Make plots of correlation
 
 ## Figure 2
-p<-ggplot(tuber_shape, aes(x=caliper_ratio, y=ratio)) + geom_point(size=0.5, color=c("grey30")) + theme_bw() + xlab("L/W ratio (caliper)") + ylab("L/W ratio (computer vision)")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-ggplot(tuber_shape, aes(x=caliper_ratio, y=ratio)) + geom_point(size=0.5, color=c("grey10")) + theme_bw() + xlab("L/W ratio (caliper)") + ylab("L/W ratio (machine vision)")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
 
 fig.2a_path<-paste(fig.filepath, "/Fig_2a.pdf", sep="")
 
@@ -505,7 +670,7 @@ pdf(fig.2a_path, height=4, width=4)
 print(p)
 dev.off()
 
-p<-ggplot(tuber_shape, aes(x=sva, y=caliper_ratio)) + geom_point(size=0.5, color=c("grey60")) + theme_bw() + xlab("SVA") + ylab("L/W ratio (caliper)")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-ggplot(tuber_shape, aes(x=sva, y=caliper_ratio)) + geom_point(size=0.5, color=c("grey30")) + theme_bw() + xlab("SVA") + ylab("L/W ratio (caliper)")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
 fig.2b_path<-paste(fig.filepath, "/Fig_2b.pdf", sep="")
 
 pdf(fig.2b_path, height=4, width=4)
@@ -513,7 +678,7 @@ print(p)
 dev.off()
 
 
-p<-ggplot(tuber_shape, aes(x=caliper_ratio, y=eccentricity)) + geom_point(size=0.5, color=c("grey90")) + theme_bw() + xlab("L/W ratio (caliper)") + ylab("Eccentricity")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-ggplot(tuber_shape, aes(x=caliper_ratio, y=eccentricity)) + geom_point(size=0.5, color=c("grey50")) + theme_bw() + xlab("L/W ratio (caliper)") + ylab("Eccentricity")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
 
 fig.2c_path<-paste(fig.filepath, "/Fig_2c.pdf", sep="")
 
@@ -542,10 +707,68 @@ dev.off()
 
 shape<-shape[shape$tuber != "marker",]
 shape.mdl<-shape
+
+
+## Lets see how repeatable the measurements of shape are by looking at both tuber sides
+shape.all<-shape
+
+shape.cols<-shape.all[,c(21:ncol(shape.all))]
+shape.cols_nz<-shape.cols[ , which(apply(shape.cols, 2, var) != 0)]
+shape.pca<-prcomp(shape.cols_nz, scale = TRUE, center = TRUE)
+## Get % variance explained by first 2 PCs
+pct.explained<-summary(shape.pca)$importance[2,1:2] * 100
+pct_variance<-shape.pca$sdev^2/sum(shape.pca$sdev^2)
+pct_variance<-pct_variance[1:15]
+PCs<-c("PC1", "PC2", "PC3", "PC4","PC5","PC6", "PC7", "PC8", "PC9","PC10","PC11", "PC12", "PC13", "PC14","PC15")
+skree<-cbind(PCs, pct_variance)
+skree<-as.data.frame(skree)
+colnames(skree)<-c("PC", "Variance_Explained")
+skree$PC<-factor(skree$PC, levels=c("PC1", "PC2", "PC3", "PC4","PC5","PC6", "PC7", "PC8", "PC9","PC10","PC11", "PC12", "PC13", "PC14","PC15"))
+skree$Variance_Explained<-as.numeric(as.character(skree$Variance_Explained))
+skree$Variance_Explained<-skree$Variance_Explained*100
+p<-ggplot(skree, aes(x=PC, y=Variance_Explained)) + geom_point(color="red") + ylab("% of Variance explained") + xlab("PC") + theme_bw()
+#pdf("scree_plot_shape_PCA.pdf", height=4, width=6)
+print(p)
+#dev.off()
+
+PC13<-as.data.frame(shape.pca$x[,1:3])
+PC13$clone<-shape.all$clone
+PC13$tuber<-shape.all$tuber
+PC13$rep<-shape.all$rep
+PC13$side<-shape.all$side
+
+## Lets merge PC and biomass profile data
+shape_PCA<-merge(shape.all, PC13, by=c('clone', 'tuber', 'rep', 'side'), all=T)
+#write.csv(shape_PCA, file="biomass_profile_PCA_data_NM.csv", quote=F, row.names = F)
+
+#p<-ggplot(PC16, aes(x=PC1, y=PC2)) + geom_point() + theme_bw() + theme(legend.position="none")  
+p<-ggplot(PC13, aes(x=PC1, y=PC2)) + geom_point() + theme_bw() + theme(legend.position="none")  
+q<- p + xlab(paste("PC1 (", pct.explained[1], "%)", sep="")) + ylab(paste("PC2 (", pct.explained[2], "%)", sep=""))
+q<-q+ggtitle("PCA of Tuber biomass profile")
+
+## Merge PC values and other measurements of shape
+tuber_shape.all<-merge(shape.all[,c(2,3,4,6,13,14)], PC13, by=c('clone', 'tuber', 'rep', 'side'), all=T)
+
+shape_side1<-tuber_shape.all[tuber_shape.all$side == 1,]
+shape_side2<-tuber_shape.all[tuber_shape.all$side == 2,]
+
+colnames(shape_side1)[c(5:ncol(shape_side1))]<-paste(colnames(shape_side1)[c(5:ncol(shape_side1))], "1", sep="_")
+colnames(shape_side2)[c(5:ncol(shape_side2))]<-paste(colnames(shape_side2)[c(5:ncol(shape_side2))], "2", sep="_")
+
+shape_compareSides<-merge(shape_side1[,-c(4)], shape_side2[,-c(4)], by=c('clone', 'rep', 'tuber'), all=T)
+shape_compareSides<-shape_compareSides[complete.cases(shape_compareSides),]
+
+cor(shape_compareSides$ratio_1, shape_compareSides$ratio_2)
+cor(shape_compareSides$eccentricity_1, shape_compareSides$eccentricity_2)
+cor(shape_compareSides$PC1_1, shape_compareSides$PC1_2)
+cor(shape_compareSides$PC2_1, shape_compareSides$PC2_2)
+cor(shape_compareSides$PC3_1, shape_compareSides$PC3_2)
+
+
 ## Keep only one side of the tuber
 shape<-shape[shape$side == 1,]
 
-shape.cols<-shape[,c(18:ncol(shape))]
+shape.cols<-shape[,c(21:ncol(shape))]
 shape.cols_nz<-shape.cols[ , which(apply(shape.cols, 2, var) != 0)]
 shape.pca<-prcomp(shape.cols_nz, scale = TRUE, center = TRUE)
 ## Get % variance explained by first 2 PCs
@@ -581,8 +804,9 @@ q<-q+ggtitle("PCA of Tuber biomass profile")
 
 ## Get correlation between L/W ratio and PC values
 cor(tuber_shape$ratio, tuber_shape$PC1, use="complete.obs")
+cor(tuber_shape$sva, tuber_shape$PC1, use="complete.obs")
 
-p<-ggplot(tuber_shape, aes(x=ratio, y=PC1)) + geom_point(size=0.5, color=c("grey30")) + theme_bw() + xlab("L/W ratio (computer vision)") + ylab("PC1shape")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-ggplot(tuber_shape, aes(x=ratio, y=PC1)) + geom_point(size=0.5, color=c("grey10")) + theme_bw() + xlab("L/W ratio (machine vision)") + ylab("PC1shape")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
 
 fig.3a_path<-paste(fig.filepath, "/Fig_3a.pdf", sep="")
 
@@ -593,7 +817,7 @@ dev.off()
 
 cor(tuber_shape$ratio, tuber_shape$PC2, use="complete.obs")
 
-p<-ggplot(tuber_shape, aes(x=ratio, y=PC2)) + geom_point(size=0.5, color=c("grey60")) + theme_bw() + xlab("L/W ratio (computer vision)") + ylab("PC2shape")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-ggplot(tuber_shape, aes(x=ratio, y=PC2)) + geom_point(size=0.5, color=c("grey30")) + theme_bw() + xlab("L/W ratio (machine vision)") + ylab("PC2shape")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
 
 fig.3b_path<-paste(fig.filepath, "/Fig_3b.pdf", sep="")
 
@@ -603,7 +827,7 @@ dev.off()
 
 cor(tuber_shape$ratio, tuber_shape$PC3, use="complete.obs")
 
-p<-ggplot(tuber_shape, aes(x=ratio, y=PC3)) + geom_point(size=0.5, color=c("grey90")) + theme_bw() + xlab("L/W ratio (computer vision)") + ylab("PC3shape")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-ggplot(tuber_shape, aes(x=ratio, y=PC3)) + geom_point(size=0.5, color=c("grey50")) + theme_bw() + xlab("L/W ratio (machine vision)") + ylab("PC3shape")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
 
 
 fig.3c_path<-paste(fig.filepath, "/Fig_3c.pdf", sep="")
@@ -619,10 +843,10 @@ cor(tuber_shape$ratio, tuber_shape$PC5, use="complete.obs")
 cor(tuber_shape$ratio, tuber_shape$PC6, use="complete.obs")
 
 
-## Lets plot boxplot of PC2shape
+## Lets plot boxplot of PC1shape
 tuber_shape<-tuber_shape[complete.cases(tuber_shape),]
-tuber_shape$clone = reorder(tuber_shape$clone, tuber_shape$PC2, median)
-p<-ggplot(tuber_shape, aes(x=as.factor(clone), y=PC2)) + geom_boxplot() + theme_bw()  + theme(axis.text.x = element_text(angle = 90)) + ylab("PC2shape") + xlab("Clone") + theme(text = element_text(size=15),legend.position = "none",axis.text.x = element_text(angle = 90, hjust = 1, size=6))
+tuber_shape$clone = reorder(tuber_shape$clone, tuber_shape$PC1, median)
+p<-ggplot(tuber_shape, aes(x=as.factor(clone), y=PC1)) + geom_boxplot() + theme_bw()  + theme(axis.text.x = element_text(angle = 90)) + ylab("PC1shape") + xlab("Clone") + theme(text = element_text(size=15),legend.position = "none",axis.text.x = element_text(angle = 90, hjust = 1, size=6))
 p
 
 
@@ -630,6 +854,16 @@ fig.3d_path<-paste(fig.filepath, "/Fig_3d.pdf", sep="")
 pdf(fig.3d_path, height=3, width=14)
 print(p)
 dev.off()
+
+
+tuber_shape<-tuber_shape[complete.cases(tuber_shape),]
+tuber_shape$clone = reorder(tuber_shape$clone, tuber_shape$PC2, median)
+p<-ggplot(tuber_shape, aes(x=as.factor(clone), y=PC2)) + geom_boxplot() + theme_bw()  + theme(axis.text.x = element_text(angle = 90)) + ylab("PC2shape") + xlab("Clone") + theme(text = element_text(size=15),legend.position = "none",axis.text.x = element_text(angle = 90, hjust = 1, size=6))
+p
+
+
+## Lets plot PC1 vs PC2
+p<-ggplot(data=tuber_shape, aes(x=PC1, y=PC2)) + geom_point() + theme_bw() + ylim(c(-15, 25)) 
 
 
 ## Get average of PCs on a per clone basis
@@ -649,9 +883,27 @@ clone.ratio<-mean(tuber_shape.ave$ratio)
 clone.ratio.sd<-mean(tuber_shape.sd$ratio)
 
 clone.ratio.max<-max(tuber_shape.ave$ratio)
+tuber_shape.ave[tuber_shape.ave$ratio == clone.ratio.max, "clone"]
 clone.ratio.min<-min(tuber_shape.ave$ratio)
+tuber_shape.ave[tuber_shape.ave$ratio == clone.ratio.min, "clone"]
 
 clone.ratio.sd/clone.ratio
+
+cor(tuber_shape.par$ratio.ave, tuber_shape.par$ratio.sd)
+
+
+clone.PC1<-mean(tuber_shape.ave$PC1, na.rm=TRUE)
+clone.PC1.sd<-mean(tuber_shape.sd$PC1, na.rm=TRUE)
+
+clone.PC1.max<-max(tuber_shape.ave$PC1, na.rm=TRUE)
+clone.PC1.min<-min(tuber_shape.ave$PC1, na.rm=TRUE)
+
+clone.PC1.sd/clone.PC1
+
+cor(tuber_shape.sd$PC1, tuber_shape.ave$PC1, use="complete.obs")
+
+
+
 
 clone.PC2<-mean(tuber_shape.ave$PC2, na.rm=TRUE)
 clone.PC2.sd<-mean(tuber_shape.sd$PC2, na.rm=TRUE)
@@ -664,23 +916,22 @@ clone.PC2.sd/clone.PC2
 cor(tuber_shape.sd$PC2, tuber_shape.ave$PC2, use="complete.obs")
 
 
-tuber_shape_for_h2<-tuber_shape[,c(1:2,8,9,14:ncol(tuber_shape))]
+tuber_shape_for_h2<-tuber_shape[,c(1:2,8,9,16:ncol(tuber_shape))]
 
 h2_tuber.shape<-get_h2(tuber_shape_for_h2)
 
 ## Lets do the same for tuber shape variance
-tuber_sd_for_h2<-tuber_shape[,c(1:3,8,9,14:ncol(tuber_shape))]
+tuber_sd_for_h2<-tuber_shape[,c(1:3,8,9,16:ncol(tuber_shape))]
 tuber_sd_for_h2<-aggregate(.~ clone + replicate, data=tuber_sd_for_h2, sd)
 tuber_sd_for_h2<-tuber_sd_for_h2[,-c(3)]
 
 h2_tuber.shape.sd<-get_h2(tuber_sd_for_h2)
 
 ## Lets reformat for H2 estimates
-PC16<-PC16[,c(6,7,8,9,10,11,1:5)]
-PC16<-PC16[PC16$side == 1,]
+PC16<-PC16[,c(7,8,9,1:5)]
 
 
-PC16.ave<-tuber_shape.ave[,c(1,20:ncol(tuber_shape.ave))]
+PC16.ave<-tuber_shape.ave[,c(1,23:ncol(tuber_shape.ave))]
 colnames(PC16.ave)[2:ncol(PC16.ave)]<-gsub(".ave", "", colnames(PC16.ave)[2:ncol(PC16.ave)])
 
 id.vars<-colnames(PC16.ave)[c(1)]
@@ -697,7 +948,7 @@ PC16.ave.long<-melt(PC16.ave,
 )
 
 
-PC16.sd<-tuber_shape.sd[,c(1,20:ncol(tuber_shape.sd))]
+PC16.sd<-tuber_shape.sd[,c(1,23:ncol(tuber_shape.sd))]
 
 id.vars<-colnames(PC16.sd)[1]
 measure.vars<-colnames(PC16.sd)[c(2:(ncol(PC16.sd)))]
@@ -716,13 +967,36 @@ PC16.sd.long<-melt(PC16.sd,
 
 PC16.ag<-merge(PC16.ave, PC16.sd, by=c("clone"))
 
-p<-ggplot(PC16.ag, aes(x=PC1, y=PC2)) + geom_errorbarh(aes(xmin=PC1-PC1.sd, xmax=PC1+PC1.sd)) + geom_errorbar(aes(ymin=PC2-PC2.sd, ymax=PC2+PC2.sd)) + theme_bw() + geom_point(size=1.5, shape=19, color="tan4") + xlab("PC1 (Variance explained = 22.4%; H2 = 0.56)") + ylab("PC2 (Variance explained = 20.1%; H2 = 0.23)") + ggtitle("Tuber shape characteristics (genotype mean)")  
-tempPC1<-PC16.ag[PC16.ag$clone %in% c('19', '37', '122'),]
-q<-p + geom_point(data = tempPC1, aes(x=PC1, y=PC2), color="red3", size = 6) 
-x<-q + geom_text(data = tempPC1, aes(x=PC1-1, y=PC2-1, label = as.character(clone)), color="red3", size = 4)
-tempPC2<-PC16.ag[PC16.ag$clone %in% c('2', '16', '170'),]
+p<-ggplot(PC16.ag, aes(x=PC1, y=PC2)) + geom_errorbarh(aes(xmin=PC1-PC1.sd, xmax=PC1+PC1.sd)) + geom_errorbar(aes(ymin=PC2-PC2.sd, ymax=PC2+PC2.sd)) + theme_bw() + geom_point(size=1.5, shape=19, color="tan4") + xlab("PC1") + ylab("PC2") + ggtitle("Tuber biomass profile (genotype mean)")  
+tempPC1<-PC16.ag[PC16.ag$clone %in% c('2', '189', '170'),]
+tempPC1$clone<-factor(tempPC1$clone, levels=c('2', '189', '170'))
+
+q<-p + geom_point(data = tempPC1, aes(x=PC1, y=PC2, fill=as.factor(clone)), shape=21, size = 6) + scale_fill_manual(values=c("firebrick4", "red", "pink"),guide="none")
+x<-q + geom_text(data = tempPC1, aes(x=PC1-1, y=PC2-1, label = as.character(clone), color=as.factor(clone)), size = 4) + scale_color_manual(values=c("firebrick4", "red", "pink"),guide="none")
+skree$Variance_Explained<-round(skree$Variance_Explained, 1)
+z<-x  + xlab(paste("PC1 (", skree[1,2], "%)", sep="")) + ylab(paste("PC2 (", skree[2,2], "%)", sep=""))
+
+#x<-q + geom_text(data = tempPC1, aes(x=PC1-1, y=PC2-1, label = as.character(clone)), color="red3", size = 4)
+
+fig.4_path<-paste(fig.filepath, "/Fig_4.pdf", sep="")
+pdf(fig.4_path, height=6, width=6)
+print(z)
+dev.off()
+
+
+## This can be a supplmentary figure if needed
+tempPC2<-PC16.ag[PC16.ag$clone %in% c('72', '146', '174'),]
 p<-x + geom_point(data = tempPC2, aes(x=PC1, y=PC2), color="blue2", size = 6) 
 y<-p + geom_text(data = tempPC2, aes(x=PC1-1, y=PC2-1, label = as.character(clone)), color="blue2", size = 4)
+
+
+#q<-p + geom_point(data = tempPC1, aes(x=PC1, y=PC2), color="red3", size = 6) 
+#x<-q + geom_text(data = tempPC1, aes(x=PC1-1, y=PC2-1, label = as.character(clone)), color="red3", size = 4)
+#tempPC2<-PC16.ag[PC16.ag$clone %in% c('72', '146', '174'),]
+#p<-x + geom_point(data = tempPC2, aes(x=PC1, y=PC2), color="blue2", size = 6) 
+#y<-p + geom_text(data = tempPC2, aes(x=PC1-1, y=PC2-1, label = as.character(clone)), color="blue2", size = 4)
+
+
 
 
 #fig.4_path<-paste(fig.filepath, "/Fig_4.pdf", sep="")
@@ -736,7 +1010,7 @@ print(y)
 
 
 ##### Lets assess fx 
-shape.mdl.cols<-shape.mdl[,c(18:ncol(shape.mdl))]
+shape.mdl.cols<-shape.mdl[,c(21:ncol(shape.mdl))]
 shape.mdl.cols_nz<-shape.mdl.cols[ , which(apply(shape.mdl.cols, 2, var) != 0)]
 shape.mdl.pca<-prcomp(shape.mdl.cols_nz, scale = TRUE, center = TRUE)
 
@@ -754,14 +1028,90 @@ tuber_shape.model<-tuber_shape.mdl[,c(1:3,5:ncol(tuber_shape.mdl))]
 shape.variance_output<-get_fx(tuber_shape.model)
 
 
+## Lets look at standard error for different sample sizes
+
+## First step is to identify samples with 10 tubers
+
+complete.clones<-names(table(tuber_shape$clone)[table(tuber_shape$clone) > 9])
+tuber_shape_complete<-tuber_shape[tuber_shape$clone %in% complete.clones,]
+
+tuber_shape_complete.z<-apply(tuber_shape_complete[,c(4:30)], 2, scale)
+tuber_shape_complete.z<-cbind(tuber_shape_complete[,c(1:2)], tuber_shape_complete.z)
+
+std_error_shape<-c()
+for(i in 3:10){
+  clones<-unique(tuber_shape_complete$clone)
+  for (c in clones){
+    clone.dat<-tuber_shape_complete.z[tuber_shape_complete.z$clone == c,]
+    tubers<-sample(c(1:10), i, replace=F)
+    small.dat<-clone.dat[clone.dat$tuber %in% tubers, ]
+    ratio.sd.err<-std.error(small.dat$ratio)
+    eccentricity.sd.err<-std.error(small.dat$eccentricity)
+    caliper_ratio.sd.err<-std.error(small.dat$caliper_ratio)
+    sva.sd.err<-std.error(small.dat$sva)
+    PC1.sd.err<-std.error(small.dat$PC1)
+    PC2.sd.err<-std.error(small.dat$PC2)
+    PC3.sd.err<-std.error(small.dat$PC3)
+    temp<-c(i,c,ratio.sd.err,eccentricity.sd.err,caliper_ratio.sd.err, sva.sd.err, PC1.sd.err,PC2.sd.err,PC3.sd.err)
+    std_error_shape<-rbind(std_error_shape, temp)
+  }
+}
+
+std_error_shape<-as.data.frame(std_error_shape)
+colnames(std_error_shape)<-c("Replicates","Clone", "L/W ratio (MV)", "Eccentricity","L/W ratio (caliper)","SVA","PC1.shape","PC2.shape","PC3.shape")
+
+for(i in 1:ncol(std_error_shape)){
+  std_error_shape[,i]<-as.numeric(as.character(std_error_shape[,i]))
+}
+
+std_error_shape.ag<-aggregate(.~Replicates, data=std_error_shape[,-c(2)], mean)
+
+id.vars<-colnames(std_error_shape.ag)[c(1)]
+measure.vars<-colnames(std_error_shape.ag)[c(2:(ncol(std_error_shape.ag)))]
+std_error_shape.ag.long<-melt(std_error_shape.ag,
+                             # ID variables - all the variables to keep but not split apart on
+                             id.vars=id.vars,
+                             # The source columns
+                             measure.vars=measure.vars,
+                             # Name of the destination column that will identify the original
+                             # column that the measurement came from
+                             variable.name="Trait",
+                             value.name="SE"
+)
+
+
+p<-ggplot(std_error_shape.ag.long, aes(x=Replicates, y=SE, color=Trait)) + geom_line() + theme_bw()
+q<-p+geom_point() + xlab("Number of tubers") + ylab("Standard Error")
+
+
+
+## Lets look at the eigenvectors from the Biomass profiles
+## Load in ground truth data
+BPE.filepath<-paste(base.dir, "/BiomassProfileEigenVectors.csv", sep="")
+biomass_profile.eigenvector<-read.csv(BPE.filepath)
+
+
+p<-ggplot(biomass_profile.eigenvector, aes(x=Sweep, y=Value, color=as.factor(SD))) + geom_line() + xlab("Sweep across minor axis") + ylab("Proportion tuber pixels (%)") + scale_color_grey() + theme_bw() + theme(text = element_text(size=15),legend.position = "none") + coord_flip() + scale_x_reverse() + facet_wrap(~PC)
+
+fig.4a_path<-paste(fig.filepath, "/Fig_4a.pdf", sep="")
+pdf("Figure_4a.pdf", height=5, width=10)
+print(p)
+dev.off()
 
 
 ##########################################################################################
 ## Analysis of color checker standards
 ##########################################################################################
 
+## First read in data from raw images
 scan.cc<-read.csv("color_checker_data_scanner.csv")
+blk.cc_NC<-read.csv("color_checker_data_std_not_corrected.csv")
+box.cc_NC<-read.csv("color_checker_data_box_not_corrected.csv")
+
+## Lets read in color corrected images
 blk.cc<-read.csv("color_checker_data_std.csv")
+box.cc<-read.csv("color_checker_data_box.csv")
+
 
 
 ##########
@@ -770,6 +1120,7 @@ blk.cc<-read.csv("color_checker_data_std.csv")
 
 ## Remove image 183_1.jpg (color card not in correct format)
 scan.cc<-scan.cc[scan.cc$img_name != '183_1.jpg',]
+
 
 id.vars<-colnames(scan.cc)[c(1)]
 measure.vars<-colnames(scan.cc)[c(2:(ncol(scan.cc)))]
@@ -843,8 +1194,8 @@ p<-ggplot(scan.cc_plot_long, aes(x=Color, y=Value)) + geom_point(aes(colour = he
 p
 
 
-fig.S4a_path<-paste(fig.filepath, "/Fig_S4a.pdf", sep="")
-pdf(fig.S4a_path, height=6, width=8)
+fig.S5a_path<-paste(fig.filepath, "/Fig_S5a.pdf", sep="")
+pdf(fig.S5a_path, height=6, width=8)
 print(p)
 dev.off()
 
@@ -854,8 +1205,8 @@ p<-ggplot(scan.cc_plot, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex)) + the
 
 p
 
-fig.S4c_path<-paste(fig.filepath, "/Fig_S4c.pdf", sep="")
-pdf(fig.S4c_path, height=6, width=8)
+fig.S5b_path<-paste(fig.filepath, "/Fig_S5b.pdf", sep="")
+pdf(fig.S5b_path, height=6, width=8)
 print(p)
 dev.off()
 
@@ -867,9 +1218,153 @@ scan_chip.sd<-aggregate(.~ chip, data=scan.cc_plot[,c(2,6:8)], sd)
 ## Now work on the black background 
 ##########
 
+##########
+## Start with images that haven't been color corrected
+##########
+
+## Remove problematic images
+blk.cc_NC<-blk.cc_NC[!grepl("117_", blk.cc_NC$img_name),]
+blk.cc_NC<-blk.cc_NC[!grepl("177_2", blk.cc_NC$img_name),]
+
+
+## Lets covert for a more user friendly form
+blk.cc_NC_plot<-c()
+for(i in 2:25){
+  r<-i
+  g<-i + 24
+  b<-i + 48
+  ch<-i-1
+  temp<-blk.cc_NC[,c(1,r,g,b)]
+  temp$chip<-rep(ch, nrow(temp))
+  colnames(temp)[2:4]<-c("Red", "Green", "Blue")
+  blk.cc_NC_plot<-rbind(blk.cc_NC_plot, temp)
+  
+}
+
+
+## Convert to long form
+id.vars<-colnames(blk.cc_NC)[c(1)]
+measure.vars<-colnames(blk.cc_NC)[c(2:(ncol(blk.cc_NC)))]
+
+blk.cc_NC_long<-melt(blk.cc_NC,
+                  # ID variables - all the variables to keep but not split apart on
+                  id.vars=id.vars,
+                  # The source columns
+                  measure.vars=measure.vars,
+                  # Name of the destination column that will identify the original
+                  # column that the measurement came from
+                  variable.name="Trait",
+                  value.name="measurement"
+)
+
+
+## Lets change the chip numbers to reflect the orientation on the scanner
+chips<-c(1:24)
+replacements<-c(6,12,18,24,5,11,17,23,4,10,16,22,3,9,15,21,2,8,14,20,1,7,13,19)
+output<-c()
+for(c in 1:length(chips)){
+  new_val<-replacements[c]
+  temp<-blk.cc_NC_plot[blk.cc_NC_plot$chip == c,]
+  temp$chip<-rep(new_val, nrow(temp))
+  output<-rbind(output, temp)
+}
+
+blk.cc_NC_plot<-output
+
+blk.cc_NC_plot$Red<-round(blk.cc_NC_plot$Red)
+blk.cc_NC_plot$Green<-round(blk.cc_NC_plot$Green)
+blk.cc_NC_plot$Blue<-round(blk.cc_NC_plot$Blue)
+
+blk.cc_NC_plot$hex<-rep("NA", nrow(blk.cc_NC_plot))
+
+for(rw in 1:nrow(blk.cc_NC_plot)){
+  blk.cc_NC_plot[rw,"hex"]<-rgb(blk.cc_NC_plot[rw, 'Red'],blk.cc_NC_plot[rw, 'Green'],blk.cc_NC_plot[rw, 'Blue'],max=255)
+}
+
+cols<-blk.cc_NC_plot$hex
+names(cols)<-blk.cc_NC_plot$hex
+
+blk.cc_NC_plot_long<-melt(blk.cc_NC_plot,
+                       # ID variables - all the variables to keep but not split apart on
+                       id.vars=c("img_name", "chip", "hex"),
+                       # The source columns
+                       measure.vars=c("Red", "Green", "Blue" ),
+                       # Name of the destination column that will identify the original
+                       # column that the measurement came from
+                       variable.name="Color",
+                       value.name="Value"
+)
+
+
+
+p<-ggplot(blk.cc_NC_plot_long, aes(x=Color, y=Value)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + ylim(0,255) + theme(legend.position="none") + facet_wrap(~chip, ncol=6) + ggtitle("Color checker (Black background; not color corrected)")
+#x<-p + stat_summary(fun.y="mean", geom="point", size=6, shape=4, col="red") 
+#p +  stat_summary(fun.data=mean_se, geom = "errorbar", width=0.2)
+p
+
+fig.S6a_path<-paste(fig.filepath, "/Fig_S6a.pdf", sep="")
+pdf(fig.S6a_path, height=6, width=8)
+print(p)
+dev.off()
+
+
+
+
+## Lets convert to PC values
+
+## Convert to PC scores
+blk.cc_NC_for_pca<-blk.cc_NC_plot[,c(2:4)]
+
+blk.cc_NC_pca_nz<-blk.cc_NC_for_pca[ , which(apply(blk.cc_NC_for_pca, 2, var) != 0)]
+blk.cc_NC_pca<-prcomp(blk.cc_NC_pca_nz, scale = TRUE, center = TRUE)
+
+
+blk_PC<-as.data.frame(blk.cc_NC_pca$x)
+blk_PC$img_name<-blk.cc_NC_plot$img_name
+blk_PC$chip<-blk.cc_NC_plot$chip
+
+
+blk.cc_NC_plot.pc<-merge(blk.cc_NC_plot, blk_PC, by=c('img_name', 'chip'), all=T)
+
+
+
+blk.cc_NC_plot.pc$Red<-round(blk.cc_NC_plot.pc$Red)
+blk.cc_NC_plot.pc$Green<-round(blk.cc_NC_plot.pc$Green)
+blk.cc_NC_plot.pc$Blue<-round(blk.cc_NC_plot.pc$Blue)
+
+blk.cc_NC_plot.pc$hex<-rep("NA", nrow(blk.cc_NC_plot.pc))
+
+for(rw in 1:nrow(blk.cc_NC_plot.pc)){
+  blk.cc_NC_plot.pc[rw,"hex"]<-rgb(blk.cc_NC_plot.pc[rw, 'Red'],blk.cc_NC_plot.pc[rw, 'Green'],blk.cc_NC_plot.pc[rw, 'Blue'],max=255)
+}
+
+cols<-blk.cc_NC_plot.pc$hex
+names(cols)<-blk.cc_NC_plot.pc$hex
+
+
+## Plot derived PC values
+p<-ggplot(blk.cc_NC_plot.pc, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none") + ggtitle("Color checker PC (Black background; not color corrected)")
+
+fig.S6b_path<-paste(fig.filepath, "/Fig_S6b.pdf", sep="")
+pdf(fig.S6b_path, height=6, width=8)
+print(p)
+dev.off()
+
+
+
+
+## Lets get summary of variation among each PC for each chip
+blk_NC_chip.sd<-aggregate(.~ chip, data=blk.cc_NC_plot.pc[,c(2,7:9)], sd)
+
+
+
+##########
+## Now lets work on images that are color corrected
+##########
+
+
 ## Remove problematic images
 blk.cc<-blk.cc[!grepl("117_", blk.cc$img_name),]
-blk.cc<-blk.cc[!grepl("177_", blk.cc$img_name),]
 
 ## Lets covert for a more user friendly form
 blk.cc_plot<-c()
@@ -904,7 +1399,8 @@ blk.cc_long<-melt(blk.cc,
 
 ## Lets change the chip numbers to reflect the orientation on the scanner
 chips<-c(1:24)
-replacements<-c(6,12,18,24,5,11,17,23,4,10,16,22,3,9,15,21,2,8,14,20,1,7,13,19)
+#replacements<-c(9,12,18,24,5,11,17,23,4,10,16,22,3,9,15,21,2,8,14,20,1,7,13,19)
+replacements<-c(19,13,8,1,20,14,7,2,21,15,9,3,22,16,10,4,23,17,11,5,24,18,12,6)
 output<-c()
 for(c in 1:length(chips)){
   new_val<-replacements[c]
@@ -941,13 +1437,13 @@ blk.cc_plot_long<-melt(blk.cc_plot,
 
 
 
-p<-ggplot(blk.cc_plot_long, aes(x=Color, y=Value)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + ylim(0,255) + theme(legend.position="none") + facet_wrap(~chip, ncol=6) + ggtitle("Color checker (Black background)")
+p<-ggplot(blk.cc_plot_long, aes(x=Color, y=Value)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + ylim(0,255) + theme(legend.position="none") + facet_wrap(~chip, ncol=6) + ggtitle("Color checker (Black background; color corrected)")
 #x<-p + stat_summary(fun.y="mean", geom="point", size=6, shape=4, col="red") 
 #p +  stat_summary(fun.data=mean_se, geom = "errorbar", width=0.2)
 p
 
-fig.S4b_path<-paste(fig.filepath, "/Fig_S4b.pdf", sep="")
-pdf(fig.S4b_path, height=6, width=8)
+fig.S6c_path<-paste(fig.filepath, "/Fig_S6c.pdf", sep="")
+pdf(fig.S6c_path, height=6, width=8)
 print(p)
 dev.off()
 
@@ -968,8 +1464,6 @@ dev.off()
 
 ## Convert to PC scores
 blk.cc_for_pca<-blk.cc_plot[,c(2:4)]
-
-## Change chip number to reflect values on scanner
 
 blk.cc_pca_nz<-blk.cc_for_pca[ , which(apply(blk.cc_for_pca, 2, var) != 0)]
 blk.cc_pca<-prcomp(blk.cc_pca_nz, scale = TRUE, center = TRUE)
@@ -999,10 +1493,10 @@ names(cols)<-blk.cc_plot.pc$hex
 
 
 ## Plot derived PC values
-p<-ggplot(blk.cc_plot.pc, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none") + ggtitle("Color checker PC (Black background)")
+p<-ggplot(blk.cc_plot.pc, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none") + ggtitle("Color checker PC (Black background; color corrected)")
 
-fig.S4d_path<-paste(fig.filepath, "/Fig_S4d.pdf", sep="")
-pdf(fig.S4d_path, height=6, width=8)
+fig.S6d_path<-paste(fig.filepath, "/Fig_S6d.pdf", sep="")
+pdf(fig.S6d_path, height=6, width=8)
 print(p)
 dev.off()
 
@@ -1029,14 +1523,326 @@ PC_chip.sd$PC1.blk/PC_chip.sd$PC1.scan
 ## Get the average relative difference between PC1 on black background vs PC1 on the scanner
 mean(PC_chip.sd$PC1.blk/PC_chip.sd$PC1.scan)
 
+
+##########
+## Now work on the light box color cards 
+##########
+
+
+## Remove problematic images
+box.cc_NC<-box.cc_NC[!grepl('145_1_2_box', box.cc_NC$img_name),]
+
+## Lets covert for a more user friendly form
+box.cc_NC_plot<-c()
+for(i in 2:25){
+  r<-i
+  g<-i + 24
+  b<-i + 48
+  ch<-i-1
+  temp<-box.cc_NC[,c(1,r,g,b)]
+  temp$chip<-rep(ch, nrow(temp))
+  colnames(temp)[2:4]<-c("Red", "Green", "Blue")
+  box.cc_NC_plot<-rbind(box.cc_NC_plot, temp)
+  
+}
+
+
+## Convert to long form
+id.vars<-colnames(box.cc_NC)[c(1)]
+measure.vars<-colnames(box.cc_NC)[c(2:(ncol(box.cc_NC)))]
+
+box.cc_NC_long<-melt(box.cc_NC,
+                  # ID variables - all the variables to keep but not split apart on
+                  id.vars=id.vars,
+                  # The source columns
+                  measure.vars=measure.vars,
+                  # Name of the destination column that will identify the original
+                  # column that the measurement came from
+                  variable.name="Trait",
+                  value.name="measurement"
+)
+
+
+## Lets change the chip numbers to reflect the orientation on the scanner
+chips<-c(1:24)
+replacements<-c(6,12,18,24,5,11,17,23,4,10,16,22,3,9,15,21,2,8,14,20,1,7,13,19)
+output<-c()
+for(c in 1:length(chips)){
+  new_val<-replacements[c]
+  temp<-box.cc_NC_plot[box.cc_NC_plot$chip == c,]
+  temp$chip<-rep(new_val, nrow(temp))
+  output<-rbind(output, temp)
+}
+
+box.cc_NC_plot<-output
+
+box.cc_NC_plot$Red<-round(box.cc_NC_plot$Red)
+box.cc_NC_plot$Green<-round(box.cc_NC_plot$Green)
+box.cc_NC_plot$Blue<-round(box.cc_NC_plot$Blue)
+
+box.cc_NC_plot$hex<-rep("NA", nrow(box.cc_NC_plot))
+
+for(rw in 1:nrow(box.cc_NC_plot)){
+  box.cc_NC_plot[rw,"hex"]<-rgb(box.cc_NC_plot[rw, 'Red'],box.cc_NC_plot[rw, 'Green'],box.cc_NC_plot[rw, 'Blue'],max=255)
+}
+
+cols<-box.cc_NC_plot$hex
+names(cols)<-box.cc_NC_plot$hex
+
+box.cc_NC_plot_long<-melt(box.cc_NC_plot,
+                       # ID variables - all the variables to keep but not split apart on
+                       id.vars=c("img_name", "chip", "hex"),
+                       # The source columns
+                       measure.vars=c("Red", "Green", "Blue" ),
+                       # Name of the destination column that will identify the original
+                       # column that the measurement came from
+                       variable.name="Color",
+                       value.name="Value"
+)
+
+
+
+p<-ggplot(box.cc_NC_plot_long, aes(x=Color, y=Value)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + ylim(0,255) + theme(legend.position="none") + facet_wrap(~chip, ncol=6) + ggtitle("Color checker (Light box background; not color corrected)")
+#x<-p + stat_summary(fun.y="mean", geom="point", size=6, shape=4, col="red") 
+#p +  stat_summary(fun.data=mean_se, geom = "errorbar", width=0.2)
+p
+
+fig.S7a_path<-paste(fig.filepath, "/Fig_S7a.pdf", sep="")
+pdf(fig.S7a_path, height=6, width=8)
+print(p)
+dev.off()
+
+
+## Lets convert to PC values
+
+## Convert to PC scores
+box.cc_NC_for_pca<-box.cc_NC_plot[,c(2:4)]
+
+box.cc_NC_pca_nz<-box.cc_NC_for_pca[ , which(apply(box.cc_NC_for_pca, 2, var) != 0)]
+box.cc_NC_pca<-prcomp(box.cc_NC_pca_nz, scale = TRUE, center = TRUE)
+
+
+box_PC<-as.data.frame(box.cc_NC_pca$x)
+box_PC$img_name<-box.cc_NC_plot$img_name
+box_PC$chip<-box.cc_NC_plot$chip
+
+
+box.cc_NC_plot.pc<-merge(box.cc_NC_plot, box_PC, by=c('img_name', 'chip'), all=T)
+
+
+
+box.cc_NC_plot.pc$Red<-round(box.cc_NC_plot.pc$Red)
+box.cc_NC_plot.pc$Green<-round(box.cc_NC_plot.pc$Green)
+box.cc_NC_plot.pc$Blue<-round(box.cc_NC_plot.pc$Blue)
+
+box.cc_NC_plot.pc$hex<-rep("NA", nrow(box.cc_NC_plot.pc))
+
+for(rw in 1:nrow(box.cc_NC_plot.pc)){
+  box.cc_NC_plot.pc[rw,"hex"]<-rgb(box.cc_NC_plot.pc[rw, 'Red'],box.cc_NC_plot.pc[rw, 'Green'],box.cc_NC_plot.pc[rw, 'Blue'],max=255)
+}
+
+cols<-box.cc_NC_plot.pc$hex
+names(cols)<-box.cc_NC_plot.pc$hex
+
+
+## Plot derived PC values
+p<-ggplot(box.cc_NC_plot.pc, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none") + ggtitle("Color checker PC (Light box background; not color corrected)")
+
+fig.S7b_path<-paste(fig.filepath, "/Fig_S7b.pdf", sep="")
+pdf(fig.S7b_path, height=6, width=8)
+print(p)
+dev.off()
+
+
+
+
+## Lets get summary of variation among each PC for each chip
+box_NC_chip.sd<-aggregate(.~ chip, data=box.cc_NC_plot.pc[,c(2,7:9)], sd)
+
+
+
+
+## Remove problematic images
+box.cc<-box.cc[!grepl('145_1_2_box', box.cc$img_name),]
+
+## Lets covert for a more user friendly form
+box.cc_plot<-c()
+for(i in 2:25){
+  r<-i
+  g<-i + 24
+  b<-i + 48
+  ch<-i-1
+  temp<-box.cc[,c(1,r,g,b)]
+  temp$chip<-rep(ch, nrow(temp))
+  colnames(temp)[2:4]<-c("Red", "Green", "Blue")
+  box.cc_plot<-rbind(box.cc_plot, temp)
+  
+}
+
+
+## Convert to long form
+id.vars<-colnames(box.cc)[c(1)]
+measure.vars<-colnames(box.cc)[c(2:(ncol(box.cc)))]
+
+box.cc_long<-melt(box.cc,
+                  # ID variables - all the variables to keep but not split apart on
+                  id.vars=id.vars,
+                  # The source columns
+                  measure.vars=measure.vars,
+                  # Name of the destination column that will identify the original
+                  # column that the measurement came from
+                  variable.name="Trait",
+                  value.name="measurement"
+)
+
+
+## Lets change the chip numbers to reflect the orientation on the scanner
+chips<-c(1:24)
+#replacements<-c(9,12,18,24,5,11,17,23,4,10,16,22,3,9,15,21,2,8,14,20,1,7,13,19)
+replacements<-c(6,12,18,24,5,11,17,23,4,10,16,22,3,9,15,21,2,8,14,20,1,7,13,19)
+output<-c()
+for(c in 1:length(chips)){
+  new_val<-replacements[c]
+  temp<-box.cc_plot[box.cc_plot$chip == c,]
+  temp$chip<-rep(new_val, nrow(temp))
+  output<-rbind(output, temp)
+}
+
+box.cc_plot<-output
+
+box.cc_plot$Red<-round(box.cc_plot$Red)
+box.cc_plot$Green<-round(box.cc_plot$Green)
+box.cc_plot$Blue<-round(box.cc_plot$Blue)
+
+box.cc_plot$hex<-rep("NA", nrow(box.cc_plot))
+
+for(rw in 1:nrow(box.cc_plot)){
+  box.cc_plot[rw,"hex"]<-rgb(box.cc_plot[rw, 'Red'],box.cc_plot[rw, 'Green'],box.cc_plot[rw, 'Blue'],max=255)
+}
+
+cols<-box.cc_plot$hex
+names(cols)<-box.cc_plot$hex
+
+box.cc_plot_long<-melt(box.cc_plot,
+                       # ID variables - all the variables to keep but not split apart on
+                       id.vars=c("img_name", "chip", "hex"),
+                       # The source columns
+                       measure.vars=c("Red", "Green", "Blue" ),
+                       # Name of the destination column that will identify the original
+                       # column that the measurement came from
+                       variable.name="Color",
+                       value.name="Value"
+)
+
+
+
+p<-ggplot(box.cc_plot_long, aes(x=Color, y=Value)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + ylim(0,255) + theme(legend.position="none") + facet_wrap(~chip, ncol=6) + ggtitle("Color checker (Light box background; color corrected)")
+#x<-p + stat_summary(fun.y="mean", geom="point", size=6, shape=4, col="red") 
+#p +  stat_summary(fun.data=mean_se, geom = "errorbar", width=0.2)
+p
+
+fig.S7c_path<-paste(fig.filepath, "/Fig_S7c.pdf", sep="")
+pdf(fig.S7c_path, height=6, width=8)
+print(p)
+dev.off()
+
+
+
+## Lets convert to PC values
+
+## Convert to PC scores
+box.cc_for_pca<-box.cc_plot[,c(2:4)]
+
+box.cc_pca_nz<-box.cc_for_pca[ , which(apply(box.cc_for_pca, 2, var) != 0)]
+box.cc_pca<-prcomp(box.cc_pca_nz, scale = TRUE, center = TRUE)
+
+
+box_PC<-as.data.frame(box.cc_pca$x)
+box_PC$img_name<-box.cc_plot$img_name
+box_PC$chip<-box.cc_plot$chip
+
+
+box.cc_plot.pc<-merge(box.cc_plot, box_PC, by=c('img_name', 'chip'), all=T)
+
+
+
+box.cc_plot.pc$Red<-round(box.cc_plot.pc$Red)
+box.cc_plot.pc$Green<-round(box.cc_plot.pc$Green)
+box.cc_plot.pc$Blue<-round(box.cc_plot.pc$Blue)
+
+box.cc_plot.pc$hex<-rep("NA", nrow(box.cc_plot.pc))
+
+for(rw in 1:nrow(box.cc_plot.pc)){
+  box.cc_plot.pc[rw,"hex"]<-rgb(box.cc_plot.pc[rw, 'Red'],box.cc_plot.pc[rw, 'Green'],box.cc_plot.pc[rw, 'Blue'],max=255)
+}
+
+cols<-box.cc_plot.pc$hex
+names(cols)<-box.cc_plot.pc$hex
+
+
+## Plot derived PC values
+p<-ggplot(box.cc_plot.pc, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none") + ggtitle("Color checker PC (Light box background; color corrected)")
+
+fig.S7d_path<-paste(fig.filepath, "/Fig_S7d.pdf", sep="")
+pdf(fig.S7d_path, height=6, width=8)
+print(p)
+dev.off()
+
+
+box_chip.sd<-aggregate(.~ chip, data=box.cc_plot.pc[,c(2,7:9)], sd)
+
+
+###########
+## Lets compare variance (standard deviation between methods)
+###########
+
+scan_chip.sd
+box_chip.sd
+box_NC_chip.sd
+blk_chip.sd
+blk_NC_chip.sd
+
+## Lets compare non-color corrected images
+mean(scan_chip.sd$PC1.scan)
+mean(blk_NC_chip.sd$PC1)
+mean(box_NC_chip.sd$PC1)
+
+mean(blk_chip.sd$PC1)
+mean(box_chip.sd$PC1)
+
+chip<-c(1:24)
+scan.order<-rank(scan_chip.sd$PC1.scan)
+blk.order<-rank(blk_chip.sd$PC1)
+blk_NC.order<-rank(blk_NC_chip.sd$PC1)
+box.order<-rank(blk_chip.sd$PC1)
+box_NC.order<-rank(box_NC_chip.sd$PC1)
+
+color_order<-cbind(chip, scan.order, blk_NC.order, box_NC.order, blk.order, box.order)
+color_order<-as.data.frame(color_order)
+color_order$ave_nc<-rowMeans(color_order[,c(2:4)])
+color_order[order(color_order$ave_nc, decreasing = T),]
+color_order$ave_cc<-rowMeans(color_order[,c(5:6)])
+color_order[order(color_order$ave_cc, decreasing = T),]
+color_order$ave_all<-rowMeans(color_order[,c(2:6)])
+color_order[order(color_order$ave_all, decreasing = T),]
+
+table.dir<-paste(base.dir, "/tables", sep="")
+TableS1.name<-paste(table.dir, "/Table_S1.csv", sep="")
+
+write.csv(color_order, file=TableS1.name, quote=F, row.names=T)
+
+color_cor<-cor(color_order[,c(2:6)], use="complete.obs")
+corrplot(color_cor, type="upper")
+
 ##########################################################################################
 ## Analysis of tuber flesh
 ##########################################################################################
 
 
-int_color<-scan[,c(2:5,14:ncol(scan))]
+#int_color<-scan[,c(2:4,13:ncol(scan))]
+int_color<-scan[,c(2:4,13:15)]
 int_color<-int_color[int_color$tuber != "marker",]
-int_color.cols<-int_color[,c(8:ncol(int_color))]
+int_color.cols<-int_color[,c(4:ncol(int_color))]
 
 scan_pca<-int_color.cols[ , which(apply(int_color.cols, 2, var) != 0)]
 scan.color.pca<-prcomp(scan_pca, scale = TRUE, center = TRUE)
@@ -1046,12 +1852,15 @@ scan.color.pca<-prcomp(scan_pca, scale = TRUE, center = TRUE)
 int_pct.explained<-summary(scan.color.pca)$importance[2,1:2] * 100
 
 int_pct_variance<-scan.color.pca$sdev^2/sum(scan.color.pca$sdev^2)
-int_pct_variance<-int_pct_variance[1:15]
-PCs<-c("PC1", "PC2", "PC3", "PC4","PC5","PC6", "PC7", "PC8", "PC9","PC10","PC11", "PC12", "PC13", "PC14","PC15")
+#int_pct_variance<-int_pct_variance[1:6]
+int_pct_variance<-int_pct_variance[1:3]
+#PCs<-c("PC1", "PC2", "PC3", "PC4","PC5","PC6")
+PCs<-c("PC1", "PC2", "PC3")
 int_skree<-cbind(PCs, int_pct_variance)
 int_skree<-as.data.frame(int_skree)
 colnames(int_skree)<-c("PC", "Variance_Explained")
-int_skree$PC<-factor(int_skree$PC, levels=c("PC1", "PC2", "PC3", "PC4","PC5","PC6", "PC7", "PC8", "PC9","PC10","PC11", "PC12", "PC13", "PC14","PC15"))
+#int_skree$PC<-factor(int_skree$PC, levels=c("PC1", "PC2", "PC3", "PC4","PC5","PC6"))
+int_skree$PC<-factor(int_skree$PC, levels=c("PC1", "PC2", "PC3"))
 int_skree$Variance_Explained<-as.numeric(as.character(int_skree$Variance_Explained))
 int_skree$Variance_Explained<-int_skree$Variance_Explained*100
 p<-ggplot(int_skree, aes(x=PC, y=Variance_Explained)) + geom_point(color="red") + ylab("% of Variance explained") + xlab("PC") + theme_bw()
@@ -1060,7 +1869,7 @@ p<-ggplot(int_skree, aes(x=PC, y=Variance_Explained)) + geom_point(color="red") 
 print(p)
 #dev.off()
 
-int_color.PC<-as.data.frame(scan.color.pca$x[,1:5])
+int_color.PC<-as.data.frame(scan.color.pca$x[,1:3])
 int_color.PC$img_name<-int_color$img_name
 int_color.PC$clone<-int_color$clone
 int_color.PC$rep<-int_color$rep
@@ -1080,28 +1889,62 @@ for(rw in 1:nrow(int_color.PC)){
 cols<-int_color.PC$hex
 names(cols)<-int_color.PC$hex
 
+
+## This figure highlights clones with light and dark flesh
+int_color_clones<-int_color.PC[int_color.PC$clone %in% c(70, 141, 1, 22, 193, 97, 100,78),]
+p<-ggplot() + geom_point(data=int_color_clones, aes(x=PC1, y=PC2, fill=as.factor(clone)), shape=21, size=3) + theme_bw() +  theme(text = element_text(size=15)) +xlim(c(-11, 11)) + ylim(-6,2) + labs(fill = "Clone")
+q<-p + geom_point(data = int_color.PC, aes(x=PC1, y=PC2, color = hex), size=0.8) + theme_bw() + scale_color_manual(values=cols, guide="none") #+ theme(legend.position="none", text = element_text(size=15)) 
+
+## This figure highlights clones with light and dark flesh
+int_color_clones<-int_color.PC[int_color.PC$clone %in% c(70, 141, 1, 22, 193, 97, 100,78),]
+p<-ggplot() + geom_point(data=int_color_clones, aes(x=PC1, y=PC2, fill=as.factor(clone)), shape=21, size=3) + theme_bw() +  theme(text = element_text(size=15)) +xlim(c(-11, 11)) + ylim(-6,2) + labs(fill = "Clone")
+q<-p + geom_point(data = int_color.PC, aes(x=PC1, y=PC2, color = hex), size=0.8) + theme_bw() + scale_color_manual(values=cols, guide="none") #+ theme(legend.position="none", text = element_text(size=15)) 
+
+
+## THis is the figure we want!
+int_color_clones2<-int_color.PC[int_color.PC$clone %in% c(70, 141, 1, 193, 97, 100),]
+tuber_shape$clone = reorder(tuber_shape$clone, tuber_shape$caliper_ratio, median)
+int_color_clones2$clone<-factor(int_color_clones2$clone, levels=c(70, 141, 1, 193, 97, 100))
+
+p<-ggplot(data = int_color.PC, aes(x=PC1, y=PC2, color = hex), size=0.8) + geom_point() + theme_bw() + scale_color_manual(values=cols, guide="none")
+q<-p + geom_point(data=int_color_clones2, aes(x=PC1, y=PC2, fill=as.factor(clone)), shape=21, size=3) + scale_fill_manual(values=c("navy", "blue", "deepskyblue", "firebrick4", "red", "pink"),guide="none")
+z<-q  + xlab(paste("PC1 (", int_pct.explained[1], "%)", sep="")) + ylab(paste("PC2 (", int_pct.explained[2], "%)", sep=""))
+z<-z+ggtitle("Tuber flesh color")
+
+
+
+## This figure highlights clones with light and dark flesh
+p<-ggplot() + geom_point(data = int_color.PC, aes(x=PC1, y=PC2, color = hex), size=0.8) + theme_bw() + scale_color_manual(values=cols, guide="none") #+ theme(legend.position="none", text = element_text(size=15)) 
+q<-p + geom_point(data=int_color_clones, aes(x=PC1, y=PC2, fill=as.factor(clone)), shape=21, size=3) + theme_bw() +  theme(text = element_text(size=15)) + labs(fill = "Clone") # +xlim(c(-11, 11)) + ylim(-6,2) +
+z<-q + geom_point(data=int_color_clones, aes(x=PC1, y=PC2, color=hex), size=0.8) + scale_color_manual(values=cols, guide="none")
+z<-z  + xlab(paste("PC1 (", int_pct.explained[1], "%)", sep="")) + ylab(paste("PC2 (", int_pct.explained[2], "%)", sep=""))
+z<-z+ggtitle("Tuber flesh color")
+
 p<-ggplot(int_color.PC, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex), size=0.4) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none", text = element_text(size=15))  
-q<- p + ylim(-30, 55) +xlim(-75, 50) + xlab(paste("PC1 (", int_pct.explained[1], "%)", sep="")) + ylab(paste("PC2 (", int_pct.explained[2], "%)", sep=""))
+#q<- p + ylim(-30, 55) +xlim(-75, 50) + xlab(paste("PC1 (", int_pct.explained[1], "%)", sep="")) + ylab(paste("PC2 (", int_pct.explained[2], "%)", sep=""))
+q<- p  + xlab(paste("PC1 (", int_pct.explained[1], "%)", sep="")) + ylab(paste("PC2 (", int_pct.explained[2], "%)", sep=""))
 q<-q+ggtitle("Tuber flesh color")
 
 #pdf("PCA_tuber_flesh_color", height=4, width=4)
 print(q)
 #dev.off()
+
 fig.5b_path<-paste(fig.filepath, "/Fig_5b.pdf", sep="")
 pdf(fig.5b_path, height=6, width=8)
-print(q)
+#print(q)
+print(z)
 dev.off()
 
 
 
 ## Lets calculate mean and variance by clone
-int_color.PC<-int_color.PC[,c(7:9,1:5,10:12)]
+int_color.PC<-int_color.PC[,c(4:6,1:3,7:9)]
 
 ## Get average of PCs on a per clone basis
 int_color.PC.ave<-aggregate(.~ clone, data=int_color.PC[,-c(2,3)], mean)
 
 ## Get standard deviation of PCs on a per clone basis
-int_color.PC.sd<-aggregate(.~ clone, data=int_color.PC[,-c(2,3,9:11)], sd)
+int_color.PC.sd<-aggregate(.~ clone, data=int_color.PC[,-c(2,3,7:9)], sd)
 colnames(int_color.PC.sd)[2:ncol(int_color.PC.sd)]<-paste(colnames(int_color.PC.sd)[2:ncol(int_color.PC.sd)], ".sd", sep="")
 
 ## Combine both parameters in the same data.frame
@@ -1109,15 +1952,15 @@ int_color.PC.par<-merge(int_color.PC.ave, int_color.PC.sd, by=c("clone"))
 int_color.PC.par<-int_color.PC.par[complete.cases(int_color.PC.par),]
 
 ## Are they correlated? Yes
-cor(int_color.PC.par$PC1.ave, int_color.PC.par$PC1.sd)
+cor(int_color.PC.par$PC1, int_color.PC.par$PC1.sd)
 
 ## What are the max and min values
-int_PC1.max<-max(int_color.PC.par$PC1.ave)
-int_PC1.min<-min(int_color.PC.par$PC1.ave)
+int_PC1.max<-max(int_color.PC.par$PC1)
+int_PC1.min<-min(int_color.PC.par$PC1)
 
 
 ## Lets make a plot of genotype means
-int_color.PC.par$hex<-rep("NA", nrow(int_color.PC))
+int_color.PC.par$hex<-rep("NA", nrow(int_color.PC.par))
 int_color.PC.par$Red<-round(int_color.PC.par$Red)
 int_color.PC.par$Green<-round(int_color.PC.par$Green)
 int_color.PC.par$Blue<-round(int_color.PC.par$Blue)
@@ -1131,7 +1974,8 @@ cols<-int_color.PC.par$hex
 names(cols)<-int_color.PC.par$hex
 
 
-p<-ggplot(int_color.PC.par, aes(x=PC1, y=PC2)) + geom_errorbarh(aes(xmin=PC1-PC1.sd, xmax=PC1+PC1.sd)) + geom_errorbar(aes(ymin=PC2-PC2.sd, ymax=PC2+PC2.sd)) + theme_bw() + geom_point(size=4, shape=19, aes(colour = hex)) + xlab("PC1") + ylab("PC2") + ggtitle("Tuber flesh color (genotype mean)") + xlim(-35, 35) + ylim(-25, 25)  + scale_colour_manual(values=cols) + theme(legend.position="none", text = element_text(size=15))  
+#p<-ggplot(int_color.PC.par, aes(x=PC1, y=PC2)) + geom_errorbarh(aes(xmin=PC1-PC1.sd, xmax=PC1+PC1.sd)) + geom_errorbar(aes(ymin=PC2-PC2.sd, ymax=PC2+PC2.sd)) + theme_bw() + geom_point(size=4, shape=19, aes(colour = hex)) + xlab("PC1") + ylab("PC2") + ggtitle("Tuber flesh color (genotype mean)") + xlim(-35, 35) + ylim(-25, 25)  + scale_colour_manual(values=cols) + theme(legend.position="none", text = element_text(size=15))  
+p<-ggplot(int_color.PC.par, aes(x=PC1, y=PC2)) + geom_errorbarh(aes(xmin=PC1-PC1.sd, xmax=PC1+PC1.sd)) + geom_errorbar(aes(ymin=PC2-PC2.sd, ymax=PC2+PC2.sd)) + theme_bw() + geom_point(size=4, shape=19, aes(colour = hex)) + xlab("PC1") + ylab("PC2") + ggtitle("Tuber flesh color (genotype mean)")  + scale_colour_manual(values=cols) + theme(legend.position="none", text = element_text(size=15))  
 
 
 p<-ggplot(int_color.PC.par, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex), size=4) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none") 
@@ -1139,42 +1983,143 @@ p<-ggplot(int_color.PC.par, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex), s
 p<-ggplot(int_color.PC.par, aes(x=PC1, y=PC2)) + geom_point() + theme_bw()  + theme(legend.position="none") 
 
 ## Calculate H2 for flesh color
-int_color.PC_for_h2<-int_color.PC[,c(1:2,4:8)]
+int_color.PC_for_h2<-int_color.PC[,c(1:2,4:6)]
 h2_int_color<-get_h2(int_color.PC_for_h2)
 
 
 ## Lets do the same for flesh color variance
-int_color.sd_for_h2<-int_color.PC[,c(1:2,4:8)]
+int_color.sd_for_h2<-int_color.PC[,c(1:2,4:6)]
 int_color.sd_for_h2<-aggregate(.~ clone + rep, data=int_color.sd_for_h2, sd)
 
 h2_int_color.sd<-get_h2(int_color.sd_for_h2)
 
 
-## Lets get variable fx from scans
-int_color.variance_output<-get_fx_scan(int_color.PC)
+
+## Lets look at standard error for different sample sizes
+
+## First step is to identify samples with 10 tubers
+
+complete.clones<-names(table(int_color.PC$clone)[table(int_color.PC$clone) > 9])
+int_color.PC_complete<-int_color.PC[int_color.PC$clone %in% complete.clones,]
+
+int_color.PC_complete.z<-apply(int_color.PC_complete[,c(4:ncol(int_color.PC_complete))], 2, scale)
+int_color.PC_complete.z<-cbind(int_color.PC_complete[,c(1:3)], int_color.PC_complete.z)
+
+std_error_int_color<-c()
+for(i in 3:10){
+  clones<-unique(int_color.PC_complete.z$clone)
+  for (c in clones){
+    clone.dat<-int_color.PC_complete.z[int_color.PC_complete.z$clone == c,]
+    tubers<-sample(c(1:10), i, replace=F)
+    small.dat<-clone.dat[clone.dat$tuber %in% tubers, ]
+    PC1.sd.err<-std.error(small.dat$PC1)
+    PC2.sd.err<-std.error(small.dat$PC2)
+    PC3.sd.err<-std.error(small.dat$PC3)
+    temp<-c(i,c,PC1.sd.err,PC2.sd.err,PC3.sd.err)
+    std_error_int_color<-rbind(std_error_int_color, temp)
+  }
+}
+
+std_error_int_color<-as.data.frame(std_error_int_color)
+colnames(std_error_int_color)<-c("Replicates","Clone", "PC1.flesh","PC2.flesh","PC3.flesh")
+
+for(i in 1:ncol(std_error_int_color)){
+  std_error_int_color[,i]<-as.numeric(as.character(std_error_int_color[,i]))
+}
+
+std_error_int_color.ag<-aggregate(.~Replicates, data=std_error_int_color[,-c(2)], mean)
+
+id.vars<-colnames(std_error_int_color.ag)[c(1)]
+measure.vars<-colnames(std_error_int_color.ag)[c(2:(ncol(std_error_int_color.ag)))]
+std_error_int_color.ag.long<-melt(std_error_int_color.ag,
+                              # ID variables - all the variables to keep but not split apart on
+                              id.vars=id.vars,
+                              # The source columns
+                              measure.vars=measure.vars,
+                              # Name of the destination column that will identify the original
+                              # column that the measurement came from
+                              variable.name="Trait",
+                              value.name="SE"
+)
+
+
+p<-ggplot(std_error_int_color.ag.long, aes(x=Replicates, y=SE, color=Trait)) + geom_line() + theme_bw()
+q<-p+geom_point() + xlab("Number of tubers") + ylab("Standard Error")
+
+
+
+#### Co-authors want analysis of how PC1 corresponds with other color space channels
+## Table S2
+
+hsv<-convert_colour(int_color.PC[,c(7:9)], from='rgb', to='hsv')
+lab<-convert_colour(int_color.PC[,c(7:9)], from='rgb', to='lab')
+xyz<-convert_colour(int_color.PC[,c(7:9)], from='rgb', to='xyz')
+
+int_color_cor<-cbind(int_color.PC, hsv)
+int_color_cor<-cbind(int_color_cor, lab)
+int_color_cor<-cbind(int_color_cor, xyz)
+
+cor(int_color_cor$PC1, int_color_cor$h)
+cor(int_color_cor$PC1, int_color_cor$s)
+cor(int_color_cor$PC1, int_color_cor$v)
+cor(int_color_cor$PC1, int_color_cor$l)
+cor(int_color_cor$PC1, int_color_cor$a)
+cor(int_color_cor$PC1, int_color_cor$b)
+cor(int_color_cor$PC1, int_color_cor$Red)
+cor(int_color_cor$PC1, int_color_cor$Green)
+cor(int_color_cor$PC1, int_color_cor$Blue)
+
+
+Hue<-cor(int_color_cor$PC1, int_color_cor$h)
+Saturation<-cor(int_color_cor$PC1, int_color_cor$s)
+Value<-cor(int_color_cor$PC1, int_color_cor$v)
+L<-cor(int_color_cor$PC1, int_color_cor$l)
+A<-cor(int_color_cor$PC1, int_color_cor$a)
+B<-cor(int_color_cor$PC1, int_color_cor$b)
+Red<-cor(int_color_cor$PC1, int_color_cor$Red)
+Green<-cor(int_color_cor$PC1, int_color_cor$Green)
+Blue<-cor(int_color_cor$PC1, int_color_cor$Blue)
+
+int_PC1.cor<-c(Hue, Saturation, Value, L, A, B)
+
+
+Hue<-cor(int_color_cor$PC2, int_color_cor$h)
+Saturation<-cor(int_color_cor$PC2, int_color_cor$s)
+Value<-cor(int_color_cor$PC2, int_color_cor$v)
+L<-cor(int_color_cor$PC2, int_color_cor$l)
+A<-cor(int_color_cor$PC2, int_color_cor$a)
+B<-cor(int_color_cor$PC2, int_color_cor$b)
+int_PC2.cor<-c(Hue, Saturation, Value, L, A, B)
+
+int_PC.cor<-rbind(int_PC1.cor,int_PC2.cor)
+colnames(int_PC.cor)<-c("Hue", "Saturation", "Value", "L", "A", "B")
 
 
 ##########################################################################################
 ## Analysis of tuber skin color
 ##########################################################################################
 
-ex_color<-std_color[,c(1:6,15:ncol(std_color))]
+#ex_color<-std_color[,c(1:6,15:ncol(std_color))]
+ex_color<-std_color[,c(1:6,15:17)]
 ex_color<-ex_color[ex_color$tuber != "marker",]
-ex_color.mdl<-ex_color
-ex_color<-ex_color[ex_color$side == 1,]
 
-ex_color.cols<-ex_color[,c(10:ncol(ex_color))]
 
-ex_color.cols_nz<-ex_color.cols[ , which(apply(ex_color.cols, 2, var) != 0)]
+## Lets compare sides of each tuber
+
+ex_color.cols_both<-ex_color[,c(7:ncol(ex_color))]
+
+ex_color.cols_nz<-ex_color.cols_both[ , which(apply(ex_color.cols_both, 2, var) != 0)]
 ex_color.pca<-prcomp(ex_color.cols_nz, scale = TRUE, center = TRUE)
 
 ex_pct_variance<-ex_color.pca$sdev^2/sum(ex_color.pca$sdev^2)
-ex_pct_variance<-ex_pct_variance[1:15]
-PCs<-c("PC1", "PC2", "PC3", "PC4","PC5","PC6", "PC7", "PC8", "PC9","PC10","PC11", "PC12", "PC13", "PC14","PC15")
+#ex_pct_variance<-ex_pct_variance[1:6]
+#PCs<-c("PC1", "PC2", "PC3", "PC4","PC5","PC6")
+ex_pct_variance<-ex_pct_variance[1:3]
+PCs<-c("PC1", "PC2", "PC3")
 ex_skree<-cbind(PCs, ex_pct_variance)
 ex_skree<-as.data.frame(ex_skree)
 colnames(ex_skree)<-c("PC", "Variance_Explained")
-ex_skree$PC<-factor(ex_skree$PC, levels=c("PC1", "PC2", "PC3", "PC4","PC5","PC6", "PC7", "PC8", "PC9","PC10","PC11", "PC12", "PC13", "PC14","PC15"))
+#ex_skree$PC<-factor(ex_skree$PC, levels=c("PC1", "PC2", "PC3", "PC4","PC5","PC6",))
 ex_skree$Variance_Explained<-as.numeric(as.character(ex_skree$Variance_Explained))
 ex_skree$Variance_Explained<-ex_skree$Variance_Explained*100
 p<-ggplot(ex_skree, aes(x=PC, y=Variance_Explained)) + geom_point(color="red") + ylab("% of Variance explained") + xlab("PC") + theme_bw()
@@ -1183,13 +2128,69 @@ p<-ggplot(ex_skree, aes(x=PC, y=Variance_Explained)) + geom_point(color="red") +
 print(p)
 #dev.off()
 
-ex_color.PC<-as.data.frame(ex_color.pca$x[,1:5])
+#ex_color.PC<-as.data.frame(ex_color.pca$x[,1:5])
+ex_color.PC<-as.data.frame(ex_color.pca$x[,1:3])
 ex_color.PC$img_name<-ex_color$img_name
 ex_color.PC$clone<-ex_color$clone
 ex_color.PC$rep<-ex_color$rep
 ex_color.PC$tuber<-ex_color$tuber
 ex_color.PC$side<-ex_color$side
 
+color_side1<-ex_color.PC[ex_color.PC$side == 1,]
+color_side2<-ex_color.PC[ex_color.PC$side == 2,]
+
+colnames(color_side1)[c(1:3)]<-paste(colnames(color_side1)[c(1:3)], "1", sep="_")
+colnames(color_side2)[c(1:3)]<-paste(colnames(color_side2)[c(1:3)], "2", sep="_")
+
+color_compareSides<-merge(color_side1[,-c(4,8)], color_side2[,-c(4,8)], by=c('clone', 'rep', 'tuber'), all=T)
+color_compareSides<-color_compareSides[complete.cases(color_compareSides),]
+
+ex_col_PC1.cor<-cor(color_compareSides$PC1_1, color_compareSides$PC1_2)
+ex_col_PC2.cor<-cor(color_compareSides$PC2_1, color_compareSides$PC2_2)
+ex_col_PC3.cor<-cor(color_compareSides$PC3_1, color_compareSides$PC3_2)
+
+ex_col_PC1.cor
+ex_col_PC2.cor
+ex_col_PC3.cor
+
+p<-ggplot(color_compareSides, aes(x=PC1_1, y=PC1_2)) + geom_point() + theme_bw() + xlab("PC1 Score: Tuber side 1") +  ylab("PC1 Score: Tuber side 2")
+p<-ggplot(color_compareSides, aes(x=PC2_1, y=PC2_2)) + geom_point() + theme_bw() + xlab("PC2 Score: Tuber side 1") +  ylab("PC2 Score: Tuber side 2")
+
+
+## Now lets work on analysis of single side
+
+ex_color.mdl<-ex_color
+ex_color<-ex_color[ex_color$side == 1,]
+
+ex_color.cols<-ex_color[,c(7:ncol(ex_color))]
+
+ex_color.cols_nz<-ex_color.cols[ , which(apply(ex_color.cols, 2, var) != 0)]
+ex_color.pca<-prcomp(ex_color.cols_nz, scale = TRUE, center = TRUE)
+
+ex_pct_variance<-ex_color.pca$sdev^2/sum(ex_color.pca$sdev^2)
+#ex_pct_variance<-ex_pct_variance[1:6]
+#PCs<-c("PC1", "PC2", "PC3", "PC4","PC5","PC6")
+ex_pct_variance<-ex_pct_variance[1:3]
+PCs<-c("PC1", "PC2", "PC3")
+ex_skree<-cbind(PCs, ex_pct_variance)
+ex_skree<-as.data.frame(ex_skree)
+colnames(ex_skree)<-c("PC", "Variance_Explained")
+#ex_skree$PC<-factor(ex_skree$PC, levels=c("PC1", "PC2", "PC3", "PC4","PC5","PC6",))
+ex_skree$Variance_Explained<-as.numeric(as.character(ex_skree$Variance_Explained))
+ex_skree$Variance_Explained<-ex_skree$Variance_Explained*100
+p<-ggplot(ex_skree, aes(x=PC, y=Variance_Explained)) + geom_point(color="red") + ylab("% of Variance explained") + xlab("PC") + theme_bw()
+
+#pdf("skree_plot_external_color_PCA.pdf", height=4, width=6)
+print(p)
+#dev.off()
+
+#ex_color.PC<-as.data.frame(ex_color.pca$x[,1:5])
+ex_color.PC<-as.data.frame(ex_color.pca$x[,1:3])
+ex_color.PC$img_name<-ex_color$img_name
+ex_color.PC$clone<-ex_color$clone
+ex_color.PC$rep<-ex_color$rep
+ex_color.PC$tuber<-ex_color$tuber
+ex_color.PC$side<-ex_color$side
 
 
 ex_color.PC$Red<-ex_color$red_ave
@@ -1208,6 +2209,34 @@ names(cols)<-ex_color.PC$hex
 PC1.ex.pct<-round(ex_skree[1,2], 1)
 PC2.ex.pct<-round(ex_skree[2,2], 1)
 
+## This figure highlights clones with light and dark skin
+ex_color_clones<-ex_color.PC[ex_color.PC$clone %in% c(176, 170, 172, 20, 88, 58, 83),]
+p<-ggplot() + geom_point(data=ex_color_clones, aes(x=PC1, y=PC2, fill=as.factor(clone)), shape=21, size=3) + theme_bw() +  theme(text = element_text(size=15)) +xlim(c(-6, 6)) + ylim(-3.5,2) + labs(fill = "Clone")
+q<-p + geom_point(data = ex_color.PC, aes(x=PC1, y=PC2, color = hex), size=0.8) + theme_bw() + scale_color_manual(values=cols, guide="none") #+ theme(legend.position="none", text = element_text(size=15)) 
+
+ex_color_clones<-ex_color.PC[ex_color.PC$clone %in% c(176, 170, 172, 20, 88, 58, 83),]
+
+p<-ggplot() + geom_point(data = ex_color.PC, aes(x=PC1, y=PC2, color = hex), size=0.8) + theme_bw() + scale_color_manual(values=cols, guide="none") #+ theme(legend.position="none", text = element_text(size=15)) 
+q<-p + geom_point(data=ex_color_clones, aes(x=PC1, y=PC2, fill=as.factor(clone)), shape=21, size=3) + theme_bw() +  theme(text = element_text(size=15)) + labs(fill = "Clone") # +xlim(c(-11, 11)) + ylim(-6,2) +
+z<-q + geom_point(data=ex_color_clones, aes(x=PC1, y=PC2, color=hex), size=0.8) + scale_color_manual(values=cols, guide="none")
+z<- z + xlab(paste("PC1 (", PC1.ex.pct,  " %)",  sep="")) + ylab(paste("PC2 (", PC2.ex.pct," %)", sep=""))
+z<-z+ggtitle("Tuber skin color")
+
+
+
+## THis is the figure we want!
+ex_color_clones2<-ex_color.PC[ex_color.PC$clone %in% c(176,172, 20, 88, 58, 83),]
+ex_color_clones2$clone<-factor(ex_color_clones2$clone, levels=c(176,172, 20, 88, 58, 83))
+
+p<-ggplot(data = ex_color.PC, aes(x=PC1, y=PC2, color = hex), size=0.8) + geom_point() + theme_bw() + scale_color_manual(values=cols, guide="none")
+q<-p + geom_point(data=ex_color_clones2, aes(x=PC1, y=PC2, fill=as.factor(clone)), shape=21, size=3) + scale_fill_manual(values=c("navy", "blue", "deepskyblue", "firebrick4", "red", "pink"),guide="none")
+z<-q  + xlab(paste("PC1 (", PC1.ex.pct, "%)", sep="")) + ylab(paste("PC2 (", PC2.ex.pct, "%)", sep=""))
+z<-z+ggtitle("Tuber skin color")
+
+
+
+
+
 p<-ggplot(ex_color.PC, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex), size=0.4) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none", text = element_text(size=15))
 q<- p + xlab(paste("PC1 (", PC1.ex.pct,  " %)",  sep="")) + ylab(paste("PC2 (", PC2.ex.pct," %)", sep=""))
 q<-q+ggtitle("Tuber skin color")
@@ -1218,18 +2247,19 @@ print(q)
 
 fig.5a_path<-paste(fig.filepath, "/Fig_5a.pdf", sep="")
 pdf(fig.5a_path, height=6, width=8)
-print(q)
+#print(q)
+print(z)
 dev.off()
 
 
 ## Lets calculate mean and variance by clone
-ex_color.PC<-ex_color.PC[,c(7:10,1:5,11:13)]
+ex_color.PC<-ex_color.PC[,c(5:8,1:3,9:11)]
 
 ## Get average of PCs on a per clone basis
 ex_color.PC.ave<-aggregate(.~ clone, data=ex_color.PC[,-c(2:4)], mean)
 
 ## Get standard deviation of PCs on a per clone basis
-ex_color.PC.sd<-aggregate(.~ clone, data=ex_color.PC[,-c(2:4,10:12)], sd)
+ex_color.PC.sd<-aggregate(.~ clone, data=ex_color.PC[,-c(2:4)], sd)
 colnames(ex_color.PC.sd)[2:ncol(ex_color.PC.sd)]<-paste(colnames(ex_color.PC.sd)[2:ncol(ex_color.PC.sd)], ".sd", sep="")
 
 ## Combine both parameters in the same data.frame
@@ -1259,7 +2289,7 @@ cols<-ex_color.PC.par$hex
 names(cols)<-ex_color.PC.par$hex
 
 
-p<-ggplot(ex_color.PC.par, aes(x=PC1, y=PC2)) + geom_errorbarh(aes(xmin=PC1-PC1.sd, xmax=PC1+PC1.sd)) + geom_errorbar(aes(ymin=PC2-PC2.sd, ymax=PC2+PC2.sd)) + theme_bw() + geom_point(size=4, shape=19, aes(colour = hex)) + xlab("PC1") + ylab("PC2") + ggtitle("Tuber skin color (genotype mean)") + xlim(-35, 35) + ylim(-25, 25)  + scale_colour_manual(values=cols) + theme(legend.position="none")  
+p<-ggplot(ex_color.PC.par, aes(x=PC1, y=PC2)) + geom_errorbarh(aes(xmin=PC1-PC1.sd, xmax=PC1+PC1.sd)) + geom_errorbar(aes(ymin=PC2-PC2.sd, ymax=PC2+PC2.sd)) + theme_bw() + geom_point(size=4, shape=19, aes(colour = hex)) + xlab("PC1") + ylab("PC2") + ggtitle("Tuber skin color (genotype mean)") + scale_colour_manual(values=cols) + theme(legend.position="none")  
 
 
 p<-ggplot(ex_color.PC.par, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex), size=4) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none") 
@@ -1267,54 +2297,234 @@ p<-ggplot(ex_color.PC.par, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex), si
 p<-ggplot(ex_color.PC.par, aes(x=PC1, y=PC2)) + geom_point() + theme_bw()  + theme(legend.position="none") 
 
 ## Calculate H2 for flesh color
-ex_color.PC_for_h2<-ex_color.PC[,c(1:2,5:9)]
+ex_color.PC_for_h2<-ex_color.PC[,c(1:2,5:10)]
 h2_ex_color<-get_h2(ex_color.PC_for_h2)
 
 
 ## Lets do the same for skin color variance
-ex_color.sd_for_h2<-ex_color.PC[,c(1:2,5:9)]
+ex_color.sd_for_h2<-ex_color.PC[,c(1:2,5:10)]
 ex_color.sd_for_h2<-aggregate(.~ clone + rep, data=ex_color.sd_for_h2, sd)
 
 h2_ex_color.sd<-get_h2(ex_color.sd_for_h2)
 
+##########
+## Lets look at standard error for different sample sizes
+##########
 
-##### Lets assess fx 
-ex_color.mdl.cols<-ex_color.mdl[,c(10:ncol(ex_color.mdl))]
-ex_color.mdl.cols_nz<-ex_color.mdl.cols[ , which(apply(ex_color.mdl.cols, 2, var) != 0)]
-ex_color.mdl.pca<-prcomp(ex_color.mdl.cols_nz, scale = TRUE, center = TRUE)
+## First step is to identify samples with 10 tubers
 
-ex_color.mdl.PC15<-as.data.frame(ex_color.mdl.pca$x[,1:5])
-ex_color.mdl.PC15$clone<-ex_color.mdl$clone
-ex_color.mdl.PC15$rep<-ex_color.mdl$rep
-ex_color.mdl.PC15$side<-ex_color.mdl$side
-ex_color.mdl.PC15$tuber<-ex_color.mdl$tuber
+complete.clones<-names(table(ex_color.PC$clone)[table(ex_color.PC$clone) > 9])
+ex_color.PC_complete<-ex_color.PC[ex_color.PC$clone %in% complete.clones,]
 
-## Merge PC values and other measurements of shape
+ex_color.PC_complete.z<-ex_color.PC_complete
 
-tuber_ex_color.mdl<-merge(ex_color.mdl[,c(2:4,6:9)], ex_color.mdl.PC15, by=c('clone', 'rep', 'side', 'tuber'), all=T)
+std_error_ex_color<-c()
+for(i in 3:10){
+  clones<-unique(ex_color.PC_complete.z$clone)
+  for (c in clones){
+    clone.dat<-ex_color.PC_complete.z[ex_color.PC_complete.z$clone == c,]
+    tubers<-sample(c(1:10), i, replace=F)
+    small.dat<-clone.dat[clone.dat$tuber %in% tubers, ]
+    PC1.sd.err<-std.error(small.dat$PC1)
+    PC2.sd.err<-std.error(small.dat$PC2)
+    PC3.sd.err<-std.error(small.dat$PC3)
+    temp<-c(i,c,PC1.sd.err,PC2.sd.err,PC3.sd.err)
+    std_error_ex_color<-rbind(std_error_ex_color, temp)
+  }
+}
 
-tuber_ex_color.model<-tuber_ex_color.mdl[,c(1:3,5:ncol(tuber_ex_color.mdl))]
-ex_color.variance_output<-get_fx(tuber_ex_color.model)
+std_error_ex_color<-as.data.frame(std_error_ex_color)
+colnames(std_error_ex_color)<-c("Replicates","Clone", "PC1.skin","PC2.skin","PC3.skin")
+
+for(i in 1:ncol(std_error_ex_color)){
+  std_error_ex_color[,i]<-as.numeric(as.character(std_error_ex_color[,i]))
+}
+
+std_error_ex_color.ag<-aggregate(.~Replicates, data=std_error_ex_color[,-c(2)], mean)
+
+id.vars<-colnames(std_error_ex_color.ag)[c(1)]
+measure.vars<-colnames(std_error_ex_color.ag)[c(2:(ncol(std_error_ex_color.ag)))]
+std_error_ex_color.ag.long<-melt(std_error_ex_color.ag,
+                                  # ID variables - all the variables to keep but not split apart on
+                                  id.vars=id.vars,
+                                  # The source columns
+                                  measure.vars=measure.vars,
+                                  # Name of the destination column that will identify the original
+                                  # column that the measurement came from
+                                  variable.name="Trait",
+                                  value.name="SE"
+)
+
+
+p<-ggplot(std_error_ex_color.ag.long, aes(x=Replicates, y=SE, color=Trait)) + geom_line() + theme_bw()
+q<-p+geom_point() + xlab("Number of tubers") + ylab("Standard Error")
+
+
+
+#### Reviewers want analysis of how PC1 corresponds with other color space channels
+hsv<-convert_colour(ex_color.PC[,c(8:10)], from='rgb', to='hsv')
+lab<-convert_colour(ex_color.PC[,c(8:10)], from='rgb', to='lab')
+xyz<-convert_colour(ex_color.PC[,c(8:10)], from='rgb', to='xyz')
+
+ex_color_cor<-cbind(ex_color.PC, hsv)
+ex_color_cor<-cbind(ex_color_cor, lab)
+ex_color_cor<-cbind(ex_color_cor, xyz)
+
+Hue<-cor(ex_color_cor$PC1, ex_color_cor$h)
+Saturation<-cor(ex_color_cor$PC1, ex_color_cor$s)
+Value<-cor(ex_color_cor$PC1, ex_color_cor$v)
+L<-cor(ex_color_cor$PC1, ex_color_cor$l)
+A<-cor(ex_color_cor$PC1, ex_color_cor$a)
+B<-cor(ex_color_cor$PC1, ex_color_cor$b)
+Red<-cor(ex_color_cor$PC1, ex_color_cor$Red)
+Green<-cor(ex_color_cor$PC1, ex_color_cor$Green)
+Blue<-cor(ex_color_cor$PC1, ex_color_cor$Blue)
+
+ex_PC1.cor<-c(Hue, Saturation, Value, L, A, B)
+
+
+Hue<-cor(ex_color_cor$PC2, ex_color_cor$h)
+Saturation<-cor(ex_color_cor$PC2, ex_color_cor$s)
+Value<-cor(ex_color_cor$PC2, ex_color_cor$v)
+L<-cor(ex_color_cor$PC2, ex_color_cor$l)
+A<-cor(ex_color_cor$PC2, ex_color_cor$a)
+B<-cor(ex_color_cor$PC2, ex_color_cor$b)
+ex_PC2.cor<-c(Hue, Saturation, Value, L, A, B)
+
+ex_PC.cor<-rbind(ex_PC1.cor,ex_PC2.cor)
+colnames(ex_PC.cor)<-c("Hue", "Saturation", "Value", "L", "A", "B")
+
+
+## Lets combine skin and flesh 
+
+color_PC.cor<-rbind(ex_PC.cor, int_PC.cor)
+PC<-c("PC1", "PC2", "PC1", "PC2")
+Tissue<-c("Skin", "Skin", "Flesh", "Flesh")
+temp<-cbind(PC, Tissue)
+color_PC.cor<-cbind(as.data.frame(temp), color_PC.cor)
+
+table.dir<-paste(base.dir, "/tables", sep="")
+TableColorCor.name<-paste(table.dir, "/ColorCor.csv", sep="")
+
+write.csv(color_PC.cor, file=TableColorCor.name, quote=F, row.names=F)
+
+## Lets make a plot of genotype means
+ex_color_cor$hex<-rep("NA", nrow(ex_color_cor))
+ex_color_cor$Red<-round(ex_color_cor$Red)
+ex_color_cor$Green<-round(ex_color_cor$Green)
+ex_color_cor$Blue<-round(ex_color_cor$Blue)
+
+
+for(rw in 1:nrow(ex_color_cor)){
+  ex_color_cor[rw,"hex"]<-rgb(ex_color_cor[rw, 'Red'],ex_color_cor[rw, 'Green'],ex_color_cor[rw, 'Blue'],max=255)
+}
+
+cols<-ex_color_cor$hex
+names(cols)<-ex_color_cor$hex
+
+
+p<-ggplot(ex_color_cor, aes(x=PC1, y=s)) + geom_point(aes(colour = hex), size=0.4) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none", text = element_text(size=15))
+q<- p + xlab(paste("PC1 (", PC1.ex.pct,  " %)",  sep="")) + ylab("Value")
+q<-q+ggtitle("Tuber skin color")
+
+
+##########
+## Lets compare with non-color corrected images
+##########
+
+std_NC.filepath<-paste(base.dir, "/A08241_potato_measurements_std_shape_not_corrected.csv", sep="")
+std_NC<-read.csv(std_NC.filepath)
+
+ex_color_NC<-std_NC[,c(2:7,16:18)]
+ex_color_NC<-ex_color_NC[ex_color_NC$tuber != "marker",]
+
+correctedImgs<-unique(ex_color$img_name)
+
+ex_color_NC<-ex_color_NC[ex_color_NC$img_name %in% correctedImgs, ]
+
+ex_color_NC<-ex_color_NC[ex_color_NC$side == 1,]
+
+ex_color_NC.cols<-ex_color_NC[,c(7:ncol(ex_color_NC))]
+
+ex_color_NC.cols_nz<-ex_color_NC.cols[ , which(apply(ex_color_NC.cols, 2, var) != 0)]
+ex_color_NC.pca<-prcomp(ex_color_NC.cols_nz, scale = TRUE, center = TRUE)
+
+ex_pct_variance<-ex_color_NC.pca$sdev^2/sum(ex_color_NC.pca$sdev^2)
+#ex_pct_variance<-ex_pct_variance[1:6]
+#PCs<-c("PC1", "PC2", "PC3", "PC4","PC5","PC6")
+ex_pct_variance<-ex_pct_variance[1:3]
+PCs<-c("PC1", "PC2", "PC3")
+ex_skree<-cbind(PCs, ex_pct_variance)
+ex_skree<-as.data.frame(ex_skree)
+colnames(ex_skree)<-c("PC", "Variance_Explained")
+#ex_skree$PC<-factor(ex_skree$PC, levels=c("PC1", "PC2", "PC3", "PC4","PC5","PC6",))
+ex_skree$Variance_Explained<-as.numeric(as.character(ex_skree$Variance_Explained))
+ex_skree$Variance_Explained<-ex_skree$Variance_Explained*100
+p<-ggplot(ex_skree, aes(x=PC, y=Variance_Explained)) + geom_point(color="red") + ylab("% of Variance explained") + xlab("PC") + theme_bw()
+
+#pdf("skree_plot_external_color_PCA.pdf", height=4, width=6)
+print(p)
+#dev.off()
+
+#ex_color_NC.PC<-as.data.frame(ex_color_NC.pca$x[,1:5])
+ex_color_NC.PC<-as.data.frame(ex_color_NC.pca$x[,1:3])
+ex_color_NC.PC$img_name<-ex_color_NC$img_name
+ex_color_NC.PC$clone<-ex_color_NC$clone
+ex_color_NC.PC$rep<-ex_color_NC$rep
+ex_color_NC.PC$tuber<-ex_color_NC$tuber
+ex_color_NC.PC$side<-ex_color_NC$side
+
+
+
+ex_color_NC.PC$Red<-ex_color_NC$red_ave
+ex_color_NC.PC$Green<-ex_color_NC$green_ave
+ex_color_NC.PC$Blue<-ex_color_NC$blue_ave
+
+ex_color_NC.PC$hex<-rep("NA", nrow(ex_color_NC.PC))
+
+for(rw in 1:nrow(ex_color_NC.PC)){
+  ex_color_NC.PC[rw,"hex"]<-rgb(ex_color_NC.PC[rw, 'Red'],ex_color_NC.PC[rw, 'Green'],ex_color_NC.PC[rw, 'Blue'],max=255)
+}
+
+cols<-ex_color_NC.PC$hex
+names(cols)<-ex_color_NC.PC$hex
+
+PC1.ex.pct<-round(ex_skree[1,2], 1)
+PC2.ex.pct<-round(ex_skree[2,2], 1)
+
+p<-ggplot(ex_color_NC.PC, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex), size=0.4) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none", text = element_text(size=15))
+q<- p + xlab(paste("PC1 (", PC1.ex.pct,  " %)",  sep="")) + ylab(paste("PC2 (", PC2.ex.pct," %)", sep=""))
+q<-q+ggtitle("Tuber skin color")
+
+#pdf("PCA_tuber_external_color", height=4, width=4)
+print(q)
+
+
+ex_color_NC.sd<-aggregate(.~ clone, data=ex_color_NC.PC[-c(4,6,7,8,12)], sd)
+colnames(ex_color_NC.sd)[2:ncol(ex_color_NC.sd)]<-paste(colnames(ex_color_NC.sd)[2:ncol(ex_color_NC.sd)], ".sd", sep="")
+mean(ex_color_NC.sd$PC1.sd)
+
 
 
 
 
 ##########################################################################################
-## Make Supplemental Figs 3
+## Make Supplemental Figs 4
 ##########################################################################################
 
 skree$Trait<-rep("Biomass profile", nrow(skree))
+skree<-skree[1:3,]
 int_skree$Trait<-rep("Flesh color", nrow(int_skree))
 ex_skree$Trait<-rep("Skin color", nrow(ex_skree))
 
 all_skree<-rbind(skree, int_skree)
 all_skree<-rbind(all_skree, ex_skree)
 
-p<-ggplot(all_skree, aes(x=PC, y=Variance_Explained, col=Trait)) + geom_point() + facet_wrap(~Trait) + xlab("Principal component (PC)") + ylab("Variance explained (%)") + theme_bw() + theme(text = element_text(size=15),legend.position = "none", axis.text.x = element_text(angle = 90))
+p<-ggplot(all_skree, aes(x=PC, y=Variance_Explained, col=Trait)) + geom_point() + facet_wrap(~Trait) + xlab("Principal component (PC)") + ylab("Variance explained (%)") + theme_bw() + theme(text = element_text(size=15),legend.position = "none", axis.text.x = element_text(angle = 90)) + ylim(0,100)
 
 
-fig.S3_path<-paste(fig.filepath, "/Fig_S3.pdf", sep="")
-pdf(fig.S3_path, height=4, width=10)
+fig.S4_path<-paste(fig.filepath, "/Fig_S4.pdf", sep="")
+pdf(fig.S4_path, height=4, width=10)
 print(p)
 dev.off()
 
@@ -1330,18 +2540,31 @@ dev.off()
 
 
 ## Lets combine data.frames
-colnames(tuber_shape)[22:ncol(tuber_shape)]<-paste(colnames(tuber_shape)[22:ncol(tuber_shape)], ".shape", sep="")
-colnames(ex_color.PC)[5:9]<-paste(colnames(ex_color.PC)[5:9], ".skin", sep="")
+#colnames(tuber_shape)[22:ncol(tuber_shape)]<-paste(colnames(tuber_shape)[22:ncol(tuber_shape)], ".shape", sep="")
+colnames(tuber_shape)[25:ncol(tuber_shape)]<-paste(colnames(tuber_shape)[25:ncol(tuber_shape)], ".shape", sep="")
+
+
+#colnames(ex_color.PC)[5:9]<-paste(colnames(ex_color.PC)[5:9], ".skin", sep="")
+#colnames(ex_color.PC)[2]<-c("replicate")
+#colnames(int_color.PC)[4:8]<-paste(colnames(int_color.PC)[4:8], ".flesh", sep="")
+#colnames(int_color.PC)[2]<-c("replicate")
+
+colnames(ex_color.PC)[5:10]<-paste(colnames(ex_color.PC)[5:10], ".skin", sep="")
 colnames(ex_color.PC)[2]<-c("replicate")
-colnames(int_color.PC)[4:8]<-paste(colnames(int_color.PC)[4:8], ".flesh", sep="")
+colnames(int_color.PC)[4:9]<-paste(colnames(int_color.PC)[4:9], ".flesh", sep="")
 colnames(int_color.PC)[2]<-c("replicate")
-tuber_traits<-merge(tuber_shape[,c(1:3,8,9,13:26)], ex_color.PC[,c(1:3,5:9)], by=c("clone", "replicate", "tuber"))
+
+
+#tuber_traits<-merge(tuber_shape[,c(1:3,8,9,13:26)], ex_color.PC[,c(1:3,5:9)], by=c("clone", "replicate", "tuber"))
+tuber_traits<-merge(tuber_shape[,c(1:3,8,9,16:27)], ex_color.PC[,c(1:3,5:7)], by=c("clone", "replicate", "tuber"))
+
+
 int_color.PC$clone<-as.factor(int_color.PC$clone)
 int_color.PC$tuber<-as.character(int_color.PC$tuber)
-tuber_traits<-merge(tuber_traits, int_color.PC[,c(1:8)], by=c("clone", "replicate", "tuber"))
+tuber_traits<-merge(tuber_traits, int_color.PC[,c(1:6)], by=c("clone", "replicate", "tuber"))
 
-dist_tuber_traits<-tuber_traits[,c(1:3,10,6,12:14,11,7:8,4,15:17,20:22,25:27)]
-colnames(dist_tuber_traits)[c(4:12)]<-c("Weight", "Area (CV)", "Length (Caliper)", "Width (Caliper)","L/W ratio (Caliper)", "SVA", "Length (CV)", "Width (CV)", "L/W ratio (CV)")
+dist_tuber_traits<-tuber_traits[,c(1:3,10,6,12:14,11,7:8,4,5,15:ncol(tuber_traits))]
+colnames(dist_tuber_traits)[c(4:13)]<-c("Weight", "Area (MV)", "Length (Caliper)", "Width (Caliper)","L/W ratio (Caliper)", "SVA", "Length (MV)", "Width (MV)", "L/W ratio (MV)", "Eccentricity")
 
 ## Convert to long form 
 
@@ -1349,7 +2572,6 @@ colnames(dist_tuber_traits)[c(4:12)]<-c("Weight", "Area (CV)", "Length (Caliper)
 id.vars<-colnames(dist_tuber_traits)[c(1:3)]
 measure.vars<-colnames(dist_tuber_traits)[c(4:(ncol(dist_tuber_traits)))]
 
-dist_tuber_traits<-dist_tuber_traits[dist_tuber_traits$PC1.flesh > -45,]
 
 dist_tuber_traits_long<-melt(dist_tuber_traits,
                       # ID variables - all the variables to keep but not split apart on
@@ -1384,8 +2606,10 @@ corrplot(tuber_trait_cor, type="upper")
 
 ## Tuber skin
 ## Aggregate by mean
-ex_color.PC.ave<-aggregate(.~clone, data=ex_color.PC[c(1:5,7,11:13)], mean)
-ex_color.PC.sd<-aggregate(.~clone, data=ex_color.PC[c(1:5,7,11:13)], sd)
+#ex_color.PC.ave<-aggregate(.~clone, data=ex_color.PC[c(1:5,7,11:13)], mean)
+#ex_color.PC.sd<-aggregate(.~clone, data=ex_color.PC[c(1:5,7,11:13)], sd)
+ex_color.PC.ave<-aggregate(.~clone, data=ex_color.PC[c(1,5:7)], mean)
+ex_color.PC.sd<-aggregate(.~clone, data=ex_color.PC[c(1,5:7)], sd)
 
 hist(ex_color.PC.ave$PC1, breaks=50)
 
@@ -1398,8 +2622,11 @@ ex_color.PC.ave[order(ex_color.PC.ave$PC1, decreasing=F),]
 ex_color.PC.sd[order(ex_color.PC.sd$PC1, decreasing=F),]
 
 ## Aggregate by mean
-int_color.PC.ave<-aggregate(.~clone, data=int_color.PC[c(1:5,7,10:12)], mean)
-int_color.PC.sd<-aggregate(.~clone, data=int_color.PC[c(1:5,7,10:12)], sd)
+#int_color.PC.ave<-aggregate(.~clone, data=int_color.PC[c(1:5,7,10:12)], mean)
+#int_color.PC.sd<-aggregate(.~clone, data=int_color.PC[c(1:5,7,10:12)], sd)
+
+int_color.PC.ave<-aggregate(.~clone, data=int_color.PC[c(1,4:6)], mean)
+int_color.PC.sd<-aggregate(.~clone, data=int_color.PC[c(1,4:6)], sd)
 
 hist(int_color.PC.ave$PC1, breaks=50)
 
@@ -1411,103 +2638,56 @@ int_color.PC.sd[order(int_color.PC.sd$PC1, decreasing=T),]
 int_color.PC.ave[order(int_color.PC.ave$PC1, decreasing=F),]
 int_color.PC.sd[order(int_color.PC.sd$PC1, decreasing=F),]
 
-## Plot values of PC1 and PC2
-## Get hex values
-int_color.PC.ave$Red<-round(int_color.PC.ave$Red)
-int_color.PC.ave$Green<-round(int_color.PC.ave$Green)
-int_color.PC.ave$Blue<-round(int_color.PC.ave$Blue)
+
+## Lets make a table that summarizes the results
+
+Trait<-c("Weight", "Area (MV)", "Length (Caliper)", "Width (Caliper)","L/W ratio (Caliper)", "SVA", "Length (MV)", "Width (MV)", "L/W ratio (MV)", "Eccentricity", "PC1.shape")
+tuber_size.par
+tuber_shape.par
+ex_color.PC.par
+int_color.PC.par
 
 
 
-## Now lets combine these two data frames
-colnames(shape.PC)[c(1:5,11)]<-c("Shape.PC1","Shape.PC2","Shape.PC3","Shape.PC4","Shape.PC5", "L/W_Ratio")
-colnames(ex_color.PC)[c(1:5,11:ncol(ex_color.PC))]<-c("Ex_Col.PC1","Ex_Col.PC2","Ex_Col.PC3","Ex_Col.PC4","Ex_Col.PC5", "Ex_Col.Red", "Ex_Col.Green", "Ex_Col.Blue","Ex_Col.Hex")
-shape.base<-std[,c(1:4,6,9:12,14)]
-colnames(shape.base)[6:ncol(shape.base)]<-c("Area", "Perimeter", "Length", "Width", "Eccentricity")
+##########################################################################################
+## Make a figure of the standard error
+##########################################################################################
 
-external.all<-merge(shape.base, shape.PC, by=c("img_name", "clone", "rep", "tuber","side"),all=T)
-external.all<-merge(external.all, ex_color.PC, by=c("img_name", "clone", "rep", "tuber","side"),all=T)
+std_error_size.ag.long
+std_error_shape.ag.long
 
-colnames(external.all)[2:5]<-c("Clone", "Rep", "Tuber", "Side")
-colnames(external.all)[16]<-c("Ratio")
+std_error_int_color.ag.long
+std_error_ex_color.ag.long
 
-variance_by_side<-c()
-for(i in c(6:24)){
-  print(i)
-  trait<-colnames(external.all)[i]
-  #print(trait)
-  #f = paste(trait, "~Clone + Rep + Side", sep="")
-  #print(f)
-  #mdl<-lm(formula = f, data=external.all)
-  
-  model<-lmer(external.all[,i]~(1|Clone)+(1|Rep)+(1|Side), data=external.all, control=lmerControl(check.nobs.vs.nlev = "ignore", check.nobs.vs.rankZ = "ignore",check.nobs.vs.nRE="ignore"))
-  re<-as.numeric(VarCorr(model))
-  res<-attr(VarCorr(model), "sc")^2
-  clone.var<-re[1]
-  rep.var<-re[2]
-  side.var<-re[3]
-  # Total variance is sum of all variances
-  tot.var<-sum(re, res)
-  # Get proportion of variance for all factors
-  clone<-clone.var/tot.var
-  rep<-rep.var/tot.var
-  side<-side.var/tot.var
-  residual<-res/tot.var
-  #clones<-c(clones,clone)
-  #reps<-c(reps,rep)
-  #sides<-c(sides,side)
-  #residuals<-c(residuals, res)
-  Pct_Variance<-c(clone, rep, side, residual)
-  Factor<-c("Clone", "Replicate", "Side", "Residual")
-  Trait<-rep(trait, 4)
-  output<-cbind(Trait, Factor, Pct_Variance)
-  variance_by_side<-rbind(variance_by_side, output)
-  
-  #mat<-summary(mdl)$coef
-  #df<-as.data.frame(mat)
-  #df<-df[2:nrow(df),]
-  #colnames(df)<-c("Var", "Std.Err", "T-value", "P-value")
-  #df$Trait<-rep(trait, nrow(df))
-  #df$Source<-rownames(df)
-  #rownames(df)<-NULL
-  #variance_by_side<-rbind(variance_by_side, df)
-}
-
-variance_by_side<-as.data.frame(variance_by_side)
-variance_by_side$Pct_Variance<-as.numeric(as.character(variance_by_side$Pct_Variance))
-
-p<-ggplot(variance_by_side, aes(x=Trait, y=Pct_Variance, group=Factor)) + geom_line(aes(colour = Factor)) + theme_bw() 
-scale_fill_manual('Treatments', values=c('Genotype', 'Treatment', 'Plot', 'G X Treatment', 'Error')) + ylim(0,1) + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
-p = ggplot(data=variance_by_side, aes(x=factor(1), y=Pct_Variance, fill = factor(Factor)))
-p=p + geom_bar(width = 1, stat="identity")
-p=p+facet_grid(facets=. ~ Trait)
-p=p+xlab("Trait") + theme(legend.title=element_blank())
-
-########################################
-## Now lets get how variable each trait is
-
-test<-aggregate(external.all_long[,8:24], by=list(external.all_long$Clone), mean, na.action=na.pass, na.rm=TRUE)
-
-
-## Convert external.all to long form                                               
-external.all_long<-external.all[,c(1:24)]
-id.vars<-colnames(external.all_long)[c(1:5)]
-measure.vars<-colnames(external.all_long)[c(7:(ncol(external.all_long)))]
-
-external.all_long<-melt(external.all_long,
-                        # ID variables - all the variables to keep but not split apart on
-                        id.vars=id.vars,
-                        # The source columns
-                        measure.vars=measure.vars,
-                        # Name of the destination column that will identify the original
-                        # column that the measurement came from
-                        variable.name="Trait",
-                        value.name="Value"
-)
+std_error_color<-rbind(std_error_ex_color.ag.long,std_error_int_color.ag.long)
 
 
 
+p<-ggplot(std_error_size.ag.long, aes(x=Replicates, y=SE, color=Trait)) + geom_line() + theme_bw()
+q<-p+geom_point() + xlab("Number of tubers") + ylab("Standard Error") + scale_color_manual(values=c("firebrick4", "red1","cornflowerblue", "orchid2", "lawngreen","darkblue","orchid4")) + ggtitle("Tuber size measurements")
+
+
+fig.S3a_path<-paste(fig.filepath, "/Fig_S3a.pdf", sep="")
+pdf(fig.S3a_path, height=8, width=8)
+print(q)
+dev.off()
+
+p<-ggplot(std_error_shape.ag.long, aes(x=Replicates, y=SE, color=Trait)) + geom_line() + theme_bw()
+q<-p+geom_point() + xlab("Number of tubers") + ylab("Standard Error") + scale_color_manual(values=c("dodgerblue", "orange","navy", "red", "darkgreen","limegreen","chartreuse"))  + ggtitle("Tuber shape measurements")
+
+fig.S3b_path<-paste(fig.filepath, "/Fig_S3b.pdf", sep="")
+pdf(fig.S3b_path, height=8, width=8)
+print(q)
+dev.off()
+
+## Color
+p<-ggplot(std_error_color, aes(x=Replicates, y=SE, color=Trait)) + geom_line() + theme_bw()
+q<-p+geom_point() + xlab("Number of tubers") + ylab("Standard Error") + scale_color_manual(values=c("burlywood4", "burlywood3","burlywood1","gray10","gray65","gray95"))  + ggtitle("Tuber color measurements")
+
+fig.S3c_path<-paste(fig.filepath, "/Fig_S3c.pdf", sep="")
+pdf(fig.S3c_path, height=8, width=8)
+print(q)
+dev.off()
 
 
 ##########################################################################################
@@ -1516,70 +2696,54 @@ external.all_long<-melt(external.all_long,
 
 h2_tuber.size
 h2_tuber.shape
-colnames(h2_tuber.shape)[11:16]<-paste(colnames(h2_tuber.shape)[11:16], 'shape', sep=".")
+colnames(h2_tuber.shape)[12:14]<-paste(colnames(h2_tuber.shape)[12:14], 'shape', sep=".")
 h2_ex_color
 colnames(h2_ex_color)<-paste(colnames(h2_ex_color), "skin", sep=".")
 h2_int_color
 colnames(h2_int_color)<-paste(colnames(h2_int_color), "flesh", sep=".")
 
-h2_all_traits<-cbind(h2_tuber.size, h2_tuber.shape[,c(1:2,5,7,10:15)], h2_ex_color, h2_int_color)
-
-h2_tuber.size.sd
-h2_tuber.shape.sd
-colnames(h2_tuber.shape.sd)[11:16]<-paste(colnames(h2_tuber.shape.sd)[11:16], 'shape', sep=".")
-h2_ex_color.sd
-colnames(h2_ex_color.sd)<-paste(colnames(h2_ex_color.sd), "skin", sep=".")
-h2_int_color.sd
-colnames(h2_int_color.sd)<-paste(colnames(h2_int_color.sd), "skin", sep=".")
-
-h2_all_traits.sd<-cbind(h2_tuber.size.sd, h2_tuber.shape.sd[,c(1:2,5,7,10:15)], h2_ex_color.sd, h2_int_color.sd)
+h2_all_traits<-cbind(h2_tuber.size[,c(17,13)], h2_tuber.shape[,c(9,10,11,8,4,5,1,2,12,13,14)], h2_ex_color[,c(1:3)], h2_int_color[,c(1:3)])
+colnames(h2_all_traits)[1:10]<-c("Tuber weight", "Tuber area (MV)", "Tuber length (caliper)", "Tuber width (caliper)", "Tuber L/W ratio (caliper)", "SVA", "Tuber length (MV)", "Tuber width (MV)", "Tuber L/W ratio (MV)","Eccentricity")
+h2_all_traits<-h2_all_traits[,c(1:3,7,4,8,5,9,6,10,11:ncol(h2_all_traits))]
 
 H2<-t(h2_all_traits)
 
 
 
-##########################################################################################
-## Make a table of % variance explained by factors
-##########################################################################################
 
-colnames(size.variance_output)<-c("Tuber area", "Length", "Width", "Perimeter")
-colnames(shape.variance_output)<-c("L/W ratio", "Eccentricity", "PC1.shape", "PC2.shape", "PC3.shape", "PC4.shape", "PC5.shape")
-ex_color.variance_output<-ex_color.variance_output[,c(4:8,1:3)]
-colnames(ex_color.variance_output)<-c("PC1.skin", "PC2.skin", "PC3.skin", "PC4.skin", "PC5.skin", "Red.skin", "Green.skin","Blue.skin")
-colnames(int_color.variance_output)<-paste(colnames(int_color.variance_output), "flesh", sep=".")
-Side<-rep("NA", ncol(int_color.variance_output))
-int_color.variance_output<-rbind(int_color.variance_output, Side)
-int_color.variance_output<-int_color.variance_output[c(1,2,4,3),]
-
-variable_fx<-cbind(size.variance_output, shape.variance_output, ex_color.variance_output, int_color.variance_output)
-variable_fx[1,]<-as.numeric(variable_fx[1,])*100
-variable_fx[2,]<-as.numeric(variable_fx[2,])*100
-variable_fx[3,1:19]<-as.numeric(variable_fx[3,1:19])*100
-variable_fx[4,]<-as.numeric(variable_fx[4,])*100
-
-variable_fx[1,]<-round(as.numeric(variable_fx[1,]),1)
-variable_fx[2,]<-round(as.numeric(variable_fx[2,]),1)
-variable_fx[3,1:19]<-round(as.numeric(variable_fx[3,1:19]),1)
-variable_fx[4,]<-round(as.numeric(variable_fx[4,]),1)
+colnames(H2)<-c("Broad-sense heritability", "Residual error")
 
 
-write.csv(variable_fx, "Table_S1.csv", quote=F, row.names=T)
+#H2_all<-H2_all[c(4,1,5,2,6,3,11,7,10,8,9,12:nrow(H2_all)),]
 
+#rownames(H2_all)[1:11]<-c("Tuber weight (oz)", "Tuber area (mm2) - CV", "Tuber length (caliper)", "Tuber length (CV)", "Tuber width (calipler)", "Tuber width (CV)", "L/W ratio (caliper)", "L/W ratio (CV)", "SVA", "Eccentricity", "Perimeter (mm)")
 
+#H2_all<-round(H2_all, 2)
 
-H2.sd<-t(h2_all_traits.sd)
+table.dir<-paste(base.dir, "/tables", sep="")
+Table1.name<-paste(table.dir, "/Table_1.csv", sep="")
 
-H2_all<-cbind(H2[,1], H2.sd[,1])
-
-colnames(H2_all)<-c("Broad-sense heritability", "Broad-sense heritability of trait standard deviation")
-H2_all<-H2_all[c(4,1,5,2,6,3,11,7,10,8,9,12:nrow(H2_all)),]
-
-rownames(H2_all)[1:11]<-c("Tuber weight (oz)", "Tuber area (mm2) - CV", "Tuber length (caliper)", "Tuber length (CV)", "Tuber width (calipler)", "Tuber width (CV)", "L/W ratio (caliper)", "L/W ratio (CV)", "SVA", "Eccentricity", "Perimeter (mm)")
-
-H2_all<-round(H2_all, 2)
-
-write.csv(H2_all, file="Table_1.csv", quote=F, row.names=T)
+write.csv(H2, file=Table1.name, quote=F, row.names=T)
 
 
 
 
+
+
+
+
+### Send data to Jae for mapping
+colnames(int_color.PC)[4:9]<-paste(colnames(int_color.PC)[4:9], "flesh", sep=".")
+colnames(ex_color.PC)[5:10]<-paste(colnames(ex_color.PC)[5:10], "skin", sep=".")
+ex_color.PC<-ex_color.PC[,-c(4)]
+
+color.PC<-merge(ex_color.PC, int_color.PC, by=c("clone", "rep", "tuber"))
+
+tuber_shape2<-tuber_shape
+tuber_shape2<-tuber_shape2[,c(1:3,8,9,16:27)]
+colnames(tuber_shape2)[c(15:17)]<-paste(colnames(tuber_shape2)[c(15:17)], "shape", sep=".")
+colnames(color.PC)[2]<-c("replicate")
+
+tuber_traits<-merge(tuber_shape2, color.PC, by=c("clone", "replicate", "tuber"))
+
+write.csv(tuber_traits, file="TuberTraits_A08241_2022-11-08.csv", quote=F, row.names=F)

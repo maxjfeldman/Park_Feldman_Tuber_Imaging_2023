@@ -1,7 +1,9 @@
 def get_A08241_measurements(cnt_order, contours, img_draw, img_name):
-    ## Note this will be different on your computer
-    #output_dir = '/Users/max.feldman/Documents/data/2020/A08241_imgs/std/output/'
-    output_file_name = output_dir + "output_" + img_name + ".jpg"
+    output_dir = '/Users/max.feldman/Documents/data/std/output/'
+    #output_dir = '/Users/max.feldman/Documents/data/box/output/'
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+    output_file_name = output_dir + "output_" + img_name + ".tif"
     img_write = img_draw.copy()
     clone, rep, side, light = image_name.split("_")
     print(clone)
@@ -17,7 +19,7 @@ def get_A08241_measurements(cnt_order, contours, img_draw, img_name):
     x_names = ["x_" + str(x) for x in list(range(1, 101))]
     y_names = ["y_" + str(y) for y in list(range(1, 101))]
     s_names = x_names + y_names
-    summary_table = pd.DataFrame(columns=['img_name', 'clone', 'rep', 'side', 'light', 'tuber', 'cmx', 'cmy', 'area', 'perimeter', 'length', 'width', 'ratio', 'eccentricity','red_ave', 'green_ave', 'blue_ave'])
+    summary_table = pd.DataFrame(columns=['img_name', 'clone', 'rep', 'side', 'light', 'tuber', 'cmx', 'cmy', 'area', 'perimeter', 'length', 'width', 'ratio', 'eccentricity','red_ave', 'green_ave', 'blue_ave', 'red_sd', 'green_sd', 'blue_sd'])
     ## Prepare empty tables for color and shape data
     r_table = pd.DataFrame(columns=r_names)
     g_table = pd.DataFrame(columns=g_names)
@@ -53,6 +55,7 @@ def get_A08241_measurements(cnt_order, contours, img_draw, img_name):
         hull = cv2.convexHull(cnt)
         m = cv2.moments(cnt)
         area = m['m00']
+        print(area)
         perimeter = cv2.arcLength(cnt, closed=True)
         x, y, width, height = cv2.boundingRect(cnt)
         cmx, cmy = (float(m['m10'] / m['m00']), float(m['m01'] / m['m00']))
@@ -68,26 +71,26 @@ def get_A08241_measurements(cnt_order, contours, img_draw, img_name):
         centerpoint, cpoint_h = cv2.findContours(centerp_binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)[-2:]
         dist = []
         vhull = np.vstack(hull)
-        for i, c in enumerate(vhull):
-            xy = tuple(c)
-            pptest = cv2.pointPolygonTest(centerpoint[0], xy, measureDist=True)
-            dist.append(pptest)
-        abs_dist = np.absolute(dist)
-        max_i = np.argmax(abs_dist)
-        caliper_max_x, caliper_max_y = list(tuple(vhull[max_i]))
-        caliper_mid_x, caliper_mid_y = [int(cmx), int(cmy)]
-        xdiff = float(caliper_max_x - caliper_mid_x)
-        ydiff = float(caliper_max_y - caliper_mid_y)
-        slope = 1
-        if xdiff != 0:
-            slope = (float(ydiff / xdiff))
-        b_line = caliper_mid_y - (slope * caliper_mid_x)
-        if slope != 0:
-            xintercept = int(-b_line / slope)
-            xintercept1 = int((ix - b_line) / slope)
-            if 0 <= xintercept <= iy and 0 <= xintercept1 <= iy:
-                cv2.line(background1, (xintercept1, ix), (xintercept, 0), (255), 3)
-            elif xintercept < 0 or xintercept > iy or xintercept1 < 0 or xintercept1 > iy:
+        #for i, c in enumerate(vhull):
+        #    xy = tuple(c)
+        #    pptest = cv2.pointPolygonTest(centerpoint[0], xy, measureDist=True)
+        #    dist.append(pptest)
+        #abs_dist = np.absolute(dist)
+        #max_i = np.argmax(abs_dist)
+        #caliper_max_x, caliper_max_y = list(tuple(vhull[max_i]))
+        #caliper_mid_x, caliper_mid_y = [int(cmx), int(cmy)]
+        #xdiff = float(caliper_max_x - caliper_mid_x)
+        #ydiff = float(caliper_max_y - caliper_mid_y)
+        #slope = 1
+        #if xdiff != 0:
+        #    slope = (float(ydiff / xdiff))
+        #b_line = caliper_mid_y - (slope * caliper_mid_x)
+        #if slope != 0:
+        #    xintercept = int(-b_line / slope)
+        #    xintercept1 = int((ix - b_line) / slope)
+        #    if 0 <= xintercept <= iy and 0 <= xintercept1 <= iy:
+        #        cv2.line(background1, (xintercept1, ix), (xintercept, 0), (255), 3)
+        #    elif xintercept < 0 or xintercept > iy or xintercept1 < 0 or xintercept1 > iy:
                 # Used a random number generator to test if either of these cases were possible but neither is possible
                 # if xintercept < 0 and 0 <= xintercept1 <= iy:
                 #     yintercept = int(b_line)
@@ -102,11 +105,11 @@ def get_A08241_measurements(cnt_order, contours, img_draw, img_name):
                 #     yintercept1 = int((slope * iy) + b_line)
                 #     cv2.line(background1, (iy, yintercept1), (xintercept, 0), (255), 5)
                 # else:
-                yintercept = int(b_line)
-                yintercept1 = int((slope * iy) + b_line)
-                cv2.line(background1, (0, yintercept), (iy, yintercept1), (255), 5)
-        else:
-            cv2.line(background1, (iy, caliper_mid_y), (0, caliper_mid_y), (255), 3)
+         #       yintercept = int(b_line)
+         #       yintercept1 = int((slope * iy) + b_line)
+         #       cv2.line(background1, (0, yintercept), (iy, yintercept1), (255), 5)
+        #else:
+         #   cv2.line(background1, (iy, caliper_mid_y), (0, caliper_mid_y), (255), 3)
         ret1, line_binary = cv2.threshold(background1, 0, 255, cv2.THRESH_BINARY)
         # print_image(line_binary,(str(device)+'_caliperfit.png'))
         cv2.drawContours(background2, [hull], -1, (255), -1)
@@ -125,7 +128,7 @@ def get_A08241_measurements(cnt_order, contours, img_draw, img_name):
         masked_spud = cv2.bitwise_and(img_write, img_write, mask=tuber_mask)
         #plt.imshow(masked_spud)
         #plt.show()
-        #img_2_5_name = output_write_directory + "/2_" + str(counter) + "_" + str(plot_number) + "_" + image_name + ".jpg"
+        #img_2_5_name = output_write_directory + "/2_" + str(counter) + "_" + str(plot_number) + "_" + image_name + ".tif"
         #cv2.imwrite(img_2_5_name, cv2.cvtColor(masked_object, cv2.COLOR_RGB2BGR))
         #plot_number += 1
         bgr_object = cv2.cvtColor(masked_spud, cv2.COLOR_RGB2BGR)
@@ -151,7 +154,7 @@ def get_A08241_measurements(cnt_order, contours, img_draw, img_name):
         #cv2.line(img_out, (x, y), (x + width, y), (255, 0, 0), 3)
         #cv2.line(img_out, (int(cmx), y), (int(cmx), y + height), (100, 255, 0), 3)
         cv2.circle(img_out, (int(cmx), int(cmy)), 10, (255, 0, 0), 10)
-        cv2.line(img_out, (tuple(caliper_transpose[caliper_length - 1])), (tuple(caliper_transpose[0])), (255, 0, 0), 10)
+        #cv2.line(img_out, (tuple(caliper_transpose[caliper_length - 1])), (tuple(caliper_transpose[0])), (255, 0, 0), 10)
         #plt.imshow(img_out)
         #plt.show()
         #img_2_6_name = output_write_directory + "/2_" + str(counter) + "_" + str(plot_number) + "_" + image_name + ".jpg"
@@ -169,14 +172,16 @@ def get_A08241_measurements(cnt_order, contours, img_draw, img_name):
         s_row = pd.DataFrame(shape_values.reshape(1,200), columns=s_names)
         s_table = s_table.append(s_row, )
         ratio = major_axis_length / minor_axis_length
-        obj_color_ave = cv2.mean(img_write, mask=tuber_mask)
-        # print(obj_color_ave)
+        obj_color_ave, obj_color_std = cv2.meanStdDev(img_write, mask=tuber_mask)
         r_ave = obj_color_ave[0]
         g_ave = obj_color_ave[1]
         b_ave = obj_color_ave[2]
+        r_std = obj_color_std[0]
+        g_std = obj_color_std[1]
+        b_std = obj_color_std[2]
         tuber = tuber_no[counter]
-        temp = [img_name, clone, rep, side, light, tuber, cmx, cmy, area, perimeter, major_axis_length, minor_axis_length, ratio, eccentricity,r_ave, g_ave, b_ave]
-        temp = pd.DataFrame([temp], columns=['img_name', 'clone', 'rep', 'side', 'light', 'tuber','cmx', 'cmy', 'area', 'perimeter', 'length', 'width', 'ratio', 'eccentricity', 'red_ave', 'green_ave', 'blue_ave'])
+        temp = [img_name, clone, rep, side, light, tuber, cmx, cmy, area, perimeter, major_axis_length, minor_axis_length, ratio, eccentricity,r_ave, g_ave, b_ave, r_std, g_std, b_std]
+        temp = pd.DataFrame([temp], columns=['img_name', 'clone', 'rep', 'side', 'light', 'tuber','cmx', 'cmy', 'area', 'perimeter', 'length', 'width', 'ratio', 'eccentricity', 'red_ave', 'green_ave', 'blue_ave', 'red_sd', 'green_sd', 'blue_sd'])
         #print(temp)
         summary_table = summary_table.append(temp, )
         counter += 1
@@ -184,12 +189,15 @@ def get_A08241_measurements(cnt_order, contours, img_draw, img_name):
     cv2.imwrite(output_file_name, cv2.cvtColor(img_out, cv2.COLOR_RGB2BGR))
     return summary_table, r_table, g_table, b_table, s_table
     #return summary_table, r_table, g_table, b_table
+ 
 
 def get_A08241_shape(cnt, tuber_no, img_mask, img_name):
-    ## Note this will be different on your computer
-    #output_dir = '/Users/max.feldman/Documents/data/2020/A08241_imgs/std/output/shapes/'
+    output_dir = '/Users/max.feldman/Documents/data/std/output/shapes/'
+    #output_dir = '/Users/max.feldman/Documents/data/box/output/shapes/'
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
     clone, rep, side, light = image_name.split("_")
-    output_file_name = output_dir + "shape_" + img_name + "_" + str(tuber_no) + ".jpg"
+    output_file_name = output_dir + "shape_" + img_name + "_" + str(tuber_no) + ".tif"
     #x_names = ["x_" + str(x) for x in list(range(1, 101))]
     #y_names = ["y_" + str(y) for y in list(range(1, 101))]
     #c_names = x_names + y_names
@@ -209,6 +217,7 @@ def get_A08241_shape(cnt, tuber_no, img_mask, img_name):
     cropped_tuber_g = cv2.cvtColor(cropped_tuber, cv2.COLOR_BGR2GRAY)
     ## Lets make the image a square to maintain aspect ratio
     pad_needed = h - w
+    pad_needed = abs(pad_needed)
     if (pad_needed % 2) == 0:
         pad_val_l = pad_needed / 2
         pad_val_r = pad_val_l
@@ -235,4 +244,3 @@ def get_A08241_shape(cnt, tuber_no, img_mask, img_name):
     cv2.drawContours(blank_scaled_image, [max(s_contours, key=cv2.contourArea)], -1, (0, 255, 0), thickness=2)
     cv2.imwrite(output_file_name, cv2.cvtColor(blank_scaled_image, cv2.COLOR_RGB2BGR))
     return(shape_values)
-

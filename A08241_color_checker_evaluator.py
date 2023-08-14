@@ -14,12 +14,13 @@ import glob
 import pandas as pd
 import skimage
 from skimage import feature
-import plotnine
+#import plotnine
 import math
 import scipy
 
 pwd = os.getcwd()
-infile_query = pwd + "/*.jpg"
+infile_query = pwd + "/*d}.tif"
+#infile_query = pwd + "/*.jpg"
 files = (glob.glob(infile_query))
 files.sort()
 
@@ -54,22 +55,16 @@ for f in files:
         continue
     ## spacing = 260
     #spacing = (260, 260)
-    ## Note that the ncols and nrows for the color checker is different between scanner and std (black background)
-    ## std (black background) is 6 x 4
-    #mask = create_color_card_mask(rgb_img=img, radius=20, start_coord=start_coord, spacing=spacing, ncols=4, nrows=6, exclude=[])
-    ## scanner is 6 x 4
-    mask = create_color_card_mask(rgb_img=imgC_copy, radius=5, start_coord=start_coord, spacing=spacing, ncols=6, nrows=4, exclude=[])
+    mask = create_color_card_mask(rgb_img=imgC_copy, radius=5, start_coord=start_coord, spacing=spacing, ncols=4, nrows=6, exclude=[])
+    #mask = create_color_card_mask(rgb_img=imgC_copy, radius=5, start_coord=start_coord, spacing=spacing, ncols=6, nrows=4, exclude=[])
     #plt.imshow(mask,cmap='gray', vmin=0, vmax=255)
     #plt.show()
     maskedImg = cv2.bitwise_and(imgC_copy, imgC_copy, mask=mask)
     #plt.imshow(maskedImg)
     #plt.show()
     col_headers, col_matrix = get_color_matrix(rgb_img=imgC_copy, mask=mask)
-    ## Note that the ncols and nrows for the color checker is different between scanner and std (black background)
-    ## scanner
-    #col_matrix = orient_color_card(col_matrix, ncols = 4)
-    ## std (black background)
-    col_matrix = orient_color_card(col_matrix, ncols=6)
+    col_matrix = orient_color_card(col_matrix, ncols = 4)
+    #col_matrix = orient_color_card(col_matrix, ncols=6)
     img_name_list = f.split('/')
     img_name = img_name_list[-1]
     col_matrix = col_matrix[:,1:]
@@ -79,10 +74,11 @@ for f in files:
         entry = np.hstack((entry, col))
         #print(entry)
     output = np.vstack((output, entry))
-## Note that the output file is hard coded (will need to be changed)
-#out_table_path = pwd + "/color_checker_data_box.csv"
-out_table_path = pwd + "/color_checker_data_std.csv"
-#out_table_path = pwd + "/color_checker_data_scanner_rotated_median.csv"
+out_table_path = pwd + "/color_checker_data_box.csv"
+#out_table_path = pwd + "/color_checker_data_std.csv"
+#out_table_path = pwd + "/color_checker_data_scanner_rotated.csv"
+#out_table_path = pwd + "/color_checker_data_scanner.csv"
+
 
 np.savetxt(out_table_path, output, fmt='%s', delimiter=",")
 

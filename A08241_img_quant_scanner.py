@@ -23,7 +23,7 @@ r_names=["r_" + str(s) for s in list(range(0, 256))]
 g_names=["g_" + str(s) for s in list(range(0, 256))]
 b_names=["b_" + str(s) for s in list(range(0, 256))]
 
-summary_table = pd.DataFrame(columns=['img_name', 'clone', 'rep', 'tuber', 'cmx', 'cmy', 'area', 'perimeter', 'length', 'width', 'ratio', 'eccentricity', 'red_ave', 'green_ave', 'blue_ave'])
+summary_table = pd.DataFrame(columns=['img_name', 'clone', 'rep', 'tuber', 'cmx', 'cmy', 'area', 'perimeter', 'length', 'width', 'ratio', 'eccentricity', 'red_ave', 'green_ave', 'blue_ave', 'red_sd', 'green_sd', 'blue_sd'])
 
 r_table = pd.DataFrame(columns=r_names)
 g_table = pd.DataFrame(columns=g_names)
@@ -32,7 +32,7 @@ b_table = pd.DataFrame(columns=b_names)
 files2=files
 
 
-for f in files:
+for f in files[260:361]:
     img = cv2.imread(f)
     image_name = f.split("/")[-1]
     image_name = image_name.replace(".jpg", "")
@@ -122,6 +122,6 @@ summary_table = pd.concat([summary_table, r_table], axis =1)
 summary_table = pd.concat([summary_table, g_table], axis =1)
 summary_table = pd.concat([summary_table, b_table], axis =1)
 # out_table_path = outfile_path + "/test_potato_measurements.csv"
-out_table_path = pwd + "/A08241_potato_measurements_scanner.csv"
+out_table_path = pwd + "/A08241_potato_measurements_scanner_2022-06-09.csv"
 summary_table.to_csv(out_table_path, mode='a', header=True, encoding='utf-8')
 
