@@ -140,7 +140,7 @@ get_fx_scan<-function(data){
 ##########################################################################################
 
 ## Define directories used and read in data
-setwd("/Users/max.feldman/Documents/data/analysis_test")
+setwd("/Users/max.feldman/Desktop/Park_Feldman_Tuber_Imaging_2023-main")
 base.dir<-getwd()
 
 ## Black background
@@ -368,7 +368,7 @@ r_area.all$Pct_Error<-r_area.all$Pct_Error-100
 
 p<-ggplot(r_area.all, aes(x=Configuration, y=Pct_Error, col=Configuration)) + geom_jitter(size = 0.1, width=0.02, height=0) + theme_bw()
 x<-p + stat_summary(fun.y="mean", geom="point", size=6, shape=4, col="black") + scale_color_manual(values = c("red", "blue", "black"))
-q<-x +  stat_summary(fun.data=mean_se, geom = "errorbar", width=0.2) + theme(text = element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1)) + ylab("Difference from average (% area)") + xlab("")
+q<-x +  stat_summary(fun.data=mean_se, geom = "errorbar", width=0.2) + theme(text = element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none") + ylab("Difference from average (% area)") + xlab("")
 
 
 fig.S1c_path<-paste(fig.filepath, "/Fig_S1c.pdf", sep="")
@@ -402,7 +402,7 @@ r_dist.all$Pct_Error<-r_dist.all$Pct_Error-100
 
 p<-ggplot(r_dist.all, aes(x=Configuration, y=Pct_Error, col=Configuration)) + geom_jitter(size = 0.1, width=0.02, height=0) + theme_bw()
 x<-p + stat_summary(fun.y="mean", geom="point", size=6, shape=4, col="black") + scale_color_manual(values = c("red", "blue", "black"))
-q<-x +  stat_summary(fun.data=mean_se, geom = "errorbar", width=0.2) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + xlab("Imaging configuration") + ylab("Difference from average (%)")
+q<-x +  stat_summary(fun.data=mean_se, geom = "errorbar", width=0.2) + theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position = "none") + xlab("Imaging configuration") + ylab("Difference from average (%)")
 
 
 ##########################################################################################
@@ -439,11 +439,11 @@ colnames(std_size.one)[1:2]<-c('clone', 'tuber')
 tuber_size<-merge(std_size.one, gt, by=c("clone", "tuber"))
 
 ## Calculate correlation between various measurements
-cor(tuber_size$area_mm, tuber_size$weight, use="complete.obs")
+wt.cor<-cor(tuber_size$area_mm, tuber_size$weight, use="complete.obs")
 
-cor(tuber_size$length_mm, tuber_size$caliper_length, use="complete.obs")
+len.cor<-cor(tuber_size$length_mm, tuber_size$caliper_length, use="complete.obs")
 
-cor(tuber_size$width_mm, tuber_size$caliper_width, use="complete.obs")
+wid.cor<-cor(tuber_size$width_mm, tuber_size$caliper_width, use="complete.obs")
 
 ## Lets calculate % variance for each factor (clone, replicate, tuber size)
 # Build linear model each cofactor is a random effect
@@ -500,26 +500,41 @@ tuber_sd_for_h2<-tuber_sd_for_h2[,-c(2,3)]
 
 h2_tuber.size.sd<-get_h2(tuber_sd_for_h2)
 
+r2 <- paste("R^2 == ", round(len.cor, 2))
+
 ## Make plots of correlation between machine vision and ground truth measurements
 #p<-ggplot(tuber_size, aes(x=caliper_length, y=length_mm)) + geom_point(size=0.5, color=brown"") + theme_bw() + xlab("Caliper length (mm)") + ylab("Machine vision length (mm)") + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="red",linetype="dashed") + stat_cor(aes(size = 2, label =  ..rr.label..))
 p<-ggplot(tuber_size, aes(x=caliper_length, y=length_mm)) + geom_point(size=0.5, color="grey30") + theme_bw() + xlab("Caliper length (mm)") + ylab("Machine vision length (mm)") + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-p + annotate("text", x=80, y=150, label= r2, color="red",parse=TRUE)
+p<-p + ggtitle("Tuber length (mm)")
 
 fig.1b_path<-paste(fig.filepath, "/Fig_1b.pdf", sep="")
 pdf(fig.1b_path, height=4, width=4)
 print(p)
 dev.off()
 
+
+r2 <- paste("R^2 == ", round(wid.cor, 2))
+
+
 fig.1c_path<-paste(fig.filepath, "/Fig_1c.pdf", sep="")
 
 p<-ggplot(tuber_size, aes(x=caliper_width, y=width_mm)) + geom_point(size=0.5, color="grey50") + theme_bw() + xlab("Caliper width (mm)") + ylab("Machine vision width (mm)")  + theme(text = element_text(size=15),legend.position = "none")+ geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-p + annotate("text", x=45, y=80, label= r2, color="red",parse=TRUE)
+p<-p + ggtitle("Tuber width (mm)")
 
 
 pdf(fig.1c_path, height=4, width=4)
 print(p)
 dev.off()
 
+r2 <- paste("R^2 == ", round(wt.cor, 2))
+
+
 fig.1a_path<-paste(fig.filepath, "/Fig_1a.pdf", sep="")
-p<-ggplot(tuber_size, aes(x=weight, y=area_mm)) + geom_point(size=0.5, color=c("grey10")) + theme_bw() + xlab("Weight (oz)") + ylab("Area (mm2)")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-ggplot(tuber_size, aes(x=weight, y=area_mm)) + geom_point(size=0.5, color=c("grey10")) + theme_bw() + xlab("Weight (oz)") + ylab("Machine vision area (mm2)")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-p + annotate("text", x=5, y=9000, label= r2, color="red",parse=TRUE)
+p<-p + ggtitle("Tuber size")
 
 pdf(fig.1a_path, height=4, width=4)
 print(p)
@@ -529,7 +544,7 @@ dev.off()
 tuber_size<-tuber_size[complete.cases(tuber_size),]
 tuber_size$clone = reorder(tuber_size$clone, tuber_size$weight, median)
 p<-ggplot(tuber_size, aes(x=as.factor(clone), y=weight), color="sienna4") + geom_boxplot() + theme_bw() + xlab("Clone") + ylab("Tuber size (oz)")  + theme(text = element_text(size=15),legend.position = "none",axis.text.x = element_text(angle = 90, hjust = 1, size=6))
-
+p<-p+ggtitle("Distibution of tuber size")
 fig.1d_path<-paste(fig.filepath, "/Fig_1d.pdf", sep="")
 
 pdf(fig.1d_path, height=3, width=14)
@@ -653,16 +668,19 @@ tuber_shape<-tuber_size
 tuber_shape$caliper_ratio<-tuber_shape$caliper_length/tuber_shape$caliper_width
 
 ## Assess correlation between different measurement types
-cor(tuber_shape$sva, tuber_shape$caliper_ratio, use="complete.obs")
+sva.cor<-cor(tuber_shape$sva, tuber_shape$caliper_ratio, use="complete.obs")
 
-cor(tuber_shape$ratio, tuber_shape$caliper_ratio, use="complete.obs")
+lw.cor<-cor(tuber_shape$ratio, tuber_shape$caliper_ratio, use="complete.obs")
 
-cor(tuber_shape$ratio, tuber_shape$eccentricity, use="complete.obs")
+ecc.cor<-cor(tuber_shape$ratio, tuber_shape$eccentricity, use="complete.obs")
 
 ## Make plots of correlation
 
 ## Figure 2
+r2 <- paste("r^2 == ", round(lw.cor, 2))
 p<-ggplot(tuber_shape, aes(x=caliper_ratio, y=ratio)) + geom_point(size=0.5, color=c("grey10")) + theme_bw() + xlab("L/W ratio (caliper)") + ylab("L/W ratio (machine vision)")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-p + annotate("text", x=1.5, y=3, label= r2, color="red",parse=TRUE)
+p<-p+ggtitle("Aspect ratio")
 
 fig.2a_path<-paste(fig.filepath, "/Fig_2a.pdf", sep="")
 
@@ -670,15 +688,21 @@ pdf(fig.2a_path, height=4, width=4)
 print(p)
 dev.off()
 
+r2 <- paste("r^2 == ", round(sva.cor, 2))
 p<-ggplot(tuber_shape, aes(x=sva, y=caliper_ratio)) + geom_point(size=0.5, color=c("grey30")) + theme_bw() + xlab("SVA") + ylab("L/W ratio (caliper)")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-p + annotate("text", x=2.5, y=3, label= r2, color="red",parse=TRUE)
+p<-p+ggtitle("SVA")
+
 fig.2b_path<-paste(fig.filepath, "/Fig_2b.pdf", sep="")
 
 pdf(fig.2b_path, height=4, width=4)
 print(p)
 dev.off()
 
-
+r2 <- paste("r^2 == ", round(ecc.cor, 2))
 p<-ggplot(tuber_shape, aes(x=caliper_ratio, y=eccentricity)) + geom_point(size=0.5, color=c("grey50")) + theme_bw() + xlab("L/W ratio (caliper)") + ylab("Eccentricity")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-p + annotate("text", x=1.5, y=1.1, label= r2, color="red",parse=TRUE)
+p<-p+ggtitle("Eccentricity")
 
 fig.2c_path<-paste(fig.filepath, "/Fig_2c.pdf", sep="")
 
@@ -691,6 +715,8 @@ dev.off()
 tuber_shape<-tuber_shape[complete.cases(tuber_shape),]
 tuber_shape$clone = reorder(tuber_shape$clone, tuber_shape$caliper_ratio, median)
 p<-ggplot(tuber_shape, aes(x=as.factor(clone), y=caliper_ratio)) + geom_boxplot() + theme_bw()  + theme(axis.text.x = element_text(angle = 90)) + ylab("L/W Ratio (caliper)") + xlab("Clone") + theme(text = element_text(size=15),legend.position = "none",axis.text.x = element_text(angle = 90, hjust = 1, size=6))
+p<-p+ggtitle("Distribution of aspect ratio values")
+
 p
 
 
@@ -803,10 +829,17 @@ q<-q+ggtitle("PCA of Tuber biomass profile")
 
 
 ## Get correlation between L/W ratio and PC values
-cor(tuber_shape$ratio, tuber_shape$PC1, use="complete.obs")
+bp1.cor<-cor(tuber_shape$ratio, tuber_shape$PC1, use="complete.obs")
 cor(tuber_shape$sva, tuber_shape$PC1, use="complete.obs")
 
-p<-ggplot(tuber_shape, aes(x=ratio, y=PC1)) + geom_point(size=0.5, color=c("grey10")) + theme_bw() + xlab("L/W ratio (machine vision)") + ylab("PC1shape")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+
+r2 <- paste("r^2 == ", round(bp1.cor, 2))
+p<-ggplot(tuber_shape, aes(x=caliper_ratio, y=eccentricity)) + geom_point(size=0.5, color=c("grey50")) + theme_bw() + xlab("L/W ratio (caliper)") + ylab("Eccentricity")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+
+
+p<-ggplot(tuber_shape, aes(x=ratio, y=PC1)) + geom_point(size=0.5, color=c("grey10")) + theme_bw() + xlab("L/W ratio (machine vision)") + ylab("PC1shape (42.1 %)")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-p + annotate("text", x=2.7, y=24, label= r2, color="red",parse=TRUE)
+p<-p+ggtitle("PC1.shape")
 
 fig.3a_path<-paste(fig.filepath, "/Fig_3a.pdf", sep="")
 
@@ -815,9 +848,12 @@ print(p)
 dev.off()
 
 
-cor(tuber_shape$ratio, tuber_shape$PC2, use="complete.obs")
+bp2.cor<-cor(tuber_shape$ratio, tuber_shape$PC2, use="complete.obs")
+r2 <- paste("r^2 == ", round(bp2.cor, 2))
 
-p<-ggplot(tuber_shape, aes(x=ratio, y=PC2)) + geom_point(size=0.5, color=c("grey30")) + theme_bw() + xlab("L/W ratio (machine vision)") + ylab("PC2shape")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-ggplot(tuber_shape, aes(x=ratio, y=PC2)) + geom_point(size=0.5, color=c("grey30")) + theme_bw() + xlab("L/W ratio (machine vision)") + ylab("PC2shape (22.1 %)")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-p + annotate("text", x=2.7, y=40, label= r2, color="red",parse=TRUE)
+p<-p+ggtitle("PC2.shape")
 
 fig.3b_path<-paste(fig.filepath, "/Fig_3b.pdf", sep="")
 
@@ -825,9 +861,14 @@ pdf(fig.3b_path, height=4, width=4)
 print(p)
 dev.off()
 
-cor(tuber_shape$ratio, tuber_shape$PC3, use="complete.obs")
+bp3.cor<-cor(tuber_shape$ratio, tuber_shape$PC3, use="complete.obs")
+r2 <- paste("r^2 == ", round(bp3.cor, 2))
 
-p<-ggplot(tuber_shape, aes(x=ratio, y=PC3)) + geom_point(size=0.5, color=c("grey50")) + theme_bw() + xlab("L/W ratio (machine vision)") + ylab("PC3shape")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+cor.test(tuber_shape$ratio, tuber_shape$PC3, use="complete.obs")
+
+p<-ggplot(tuber_shape, aes(x=ratio, y=PC3)) + geom_point(size=0.5, color=c("grey50")) + theme_bw() + xlab("L/W ratio (machine vision)") + ylab("PC3shape (15.6 %)")  + theme(text = element_text(size=15),legend.position = "none") + geom_smooth(method = "lm", se = FALSE, color="black",linetype="dashed") 
+p<-p + annotate("text", x=2.7, y=25, label= r2, color="red",parse=TRUE)
+p<-p+ggtitle("PC3.shape")
 
 
 fig.3c_path<-paste(fig.filepath, "/Fig_3c.pdf", sep="")
@@ -847,7 +888,7 @@ cor(tuber_shape$ratio, tuber_shape$PC6, use="complete.obs")
 tuber_shape<-tuber_shape[complete.cases(tuber_shape),]
 tuber_shape$clone = reorder(tuber_shape$clone, tuber_shape$PC1, median)
 p<-ggplot(tuber_shape, aes(x=as.factor(clone), y=PC1)) + geom_boxplot() + theme_bw()  + theme(axis.text.x = element_text(angle = 90)) + ylab("PC1shape") + xlab("Clone") + theme(text = element_text(size=15),legend.position = "none",axis.text.x = element_text(angle = 90, hjust = 1, size=6))
-p
+p<-p+ggtitle("Tuber biomass profile distribution (PC1shape)")
 
 
 fig.3d_path<-paste(fig.filepath, "/Fig_3d.pdf", sep="")
@@ -1156,6 +1197,8 @@ scan.cc_for_pca<-scan.cc_plot[,c(2:4)]
 scan.cc_pca_nz<-scan.cc_for_pca[ , which(apply(scan.cc_for_pca, 2, var) != 0)]
 scan.cc_pca<-prcomp(scan.cc_pca_nz, scale = TRUE, center = TRUE)
 
+pct_variance<-scan.cc_pca$sdev^2/sum(scan.cc_pca$sdev^2)
+
 scan_PC<-as.data.frame(scan.cc_pca$x)
 scan_PC$img_name<-scan.cc_plot$img_name
 scan_PC$chip<-scan.cc_plot$chip
@@ -1201,7 +1244,7 @@ dev.off()
 
 
 ## Make a plot derived PC values
-p<-ggplot(scan.cc_plot, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none") + ggtitle("Color checker PC (Scanner)")
+p<-ggplot(scan.cc_plot, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none") + ggtitle("Color checker PC (Scanner)") + xlab("PC1 (69.2%)") + ylab("PC2 (22.9%)")
 
 p
 
@@ -1317,6 +1360,7 @@ blk.cc_NC_for_pca<-blk.cc_NC_plot[,c(2:4)]
 
 blk.cc_NC_pca_nz<-blk.cc_NC_for_pca[ , which(apply(blk.cc_NC_for_pca, 2, var) != 0)]
 blk.cc_NC_pca<-prcomp(blk.cc_NC_pca_nz, scale = TRUE, center = TRUE)
+pct_variance<-blk.cc_NC_pca$sdev^2/sum(blk.cc_NC_pca$sdev^2)
 
 
 blk_PC<-as.data.frame(blk.cc_NC_pca$x)
@@ -1343,7 +1387,7 @@ names(cols)<-blk.cc_NC_plot.pc$hex
 
 
 ## Plot derived PC values
-p<-ggplot(blk.cc_NC_plot.pc, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none") + ggtitle("Color checker PC (Black background; not color corrected)")
+p<-ggplot(blk.cc_NC_plot.pc, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none") + ggtitle("Color checker PC (Black background; not color corrected)") + xlab("PC1 (59.8%)") + ylab("PC2 (30.3%)")
 
 fig.S6b_path<-paste(fig.filepath, "/Fig_S6b.pdf", sep="")
 pdf(fig.S6b_path, height=6, width=8)
@@ -1467,6 +1511,7 @@ blk.cc_for_pca<-blk.cc_plot[,c(2:4)]
 
 blk.cc_pca_nz<-blk.cc_for_pca[ , which(apply(blk.cc_for_pca, 2, var) != 0)]
 blk.cc_pca<-prcomp(blk.cc_pca_nz, scale = TRUE, center = TRUE)
+pct_variance<-blk.cc_pca$sdev^2/sum(blk.cc_pca$sdev^2)
 
 
 blk_PC<-as.data.frame(blk.cc_pca$x)
@@ -1493,7 +1538,7 @@ names(cols)<-blk.cc_plot.pc$hex
 
 
 ## Plot derived PC values
-p<-ggplot(blk.cc_plot.pc, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none") + ggtitle("Color checker PC (Black background; color corrected)")
+p<-ggplot(blk.cc_plot.pc, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none") + ggtitle("Color checker PC (Black background; color corrected)") + xlab("PC1 (48.6%)") + ylab("PC2 (37.9%)")
 
 fig.S6d_path<-paste(fig.filepath, "/Fig_S6d.pdf", sep="")
 pdf(fig.S6d_path, height=6, width=8)
@@ -1620,6 +1665,7 @@ box.cc_NC_for_pca<-box.cc_NC_plot[,c(2:4)]
 
 box.cc_NC_pca_nz<-box.cc_NC_for_pca[ , which(apply(box.cc_NC_for_pca, 2, var) != 0)]
 box.cc_NC_pca<-prcomp(box.cc_NC_pca_nz, scale = TRUE, center = TRUE)
+pct_variance<-box.cc_NC_pca$sdev^2/sum(box.cc_NC_pca$sdev^2)
 
 
 box_PC<-as.data.frame(box.cc_NC_pca$x)
@@ -1646,7 +1692,7 @@ names(cols)<-box.cc_NC_plot.pc$hex
 
 
 ## Plot derived PC values
-p<-ggplot(box.cc_NC_plot.pc, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none") + ggtitle("Color checker PC (Light box background; not color corrected)")
+p<-ggplot(box.cc_NC_plot.pc, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none") + ggtitle("Color checker PC (Light box background; not color corrected)") + xlab("PC1 (61.1%)") + ylab("PC2 (29.1%)") 
 
 fig.S7b_path<-paste(fig.filepath, "/Fig_S7b.pdf", sep="")
 pdf(fig.S7b_path, height=6, width=8)
@@ -1755,6 +1801,7 @@ box.cc_for_pca<-box.cc_plot[,c(2:4)]
 
 box.cc_pca_nz<-box.cc_for_pca[ , which(apply(box.cc_for_pca, 2, var) != 0)]
 box.cc_pca<-prcomp(box.cc_pca_nz, scale = TRUE, center = TRUE)
+pct_variance<-box.cc_pca$sdev^2/sum(box.cc_pca$sdev^2)
 
 
 box_PC<-as.data.frame(box.cc_pca$x)
@@ -1781,7 +1828,7 @@ names(cols)<-box.cc_plot.pc$hex
 
 
 ## Plot derived PC values
-p<-ggplot(box.cc_plot.pc, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none") + ggtitle("Color checker PC (Light box background; color corrected)")
+p<-ggplot(box.cc_plot.pc, aes(x=PC1, y=PC2)) + geom_point(aes(colour = hex)) + theme_bw() + scale_colour_manual(values=cols) + theme(legend.position="none") + ggtitle("Color checker PC (Light box background; color corrected)") + xlab("PC1 (49.0%)") + ylab("PC2 (37.5%)")
 
 fig.S7d_path<-paste(fig.filepath, "/Fig_S7d.pdf", sep="")
 pdf(fig.S7d_path, height=6, width=8)
@@ -2747,3 +2794,84 @@ colnames(color.PC)[2]<-c("replicate")
 tuber_traits<-merge(tuber_shape2, color.PC, by=c("clone", "replicate", "tuber"))
 
 write.csv(tuber_traits, file="TuberTraits_A08241_2022-11-08.csv", quote=F, row.names=F)
+
+
+## Lets look at correlation between replicates
+
+tuber_shape.rep<-aggregate(.~ clone + replicate, data=tuber_shape2[,c(1,3,4:ncol(tuber_shape2))], mean)
+
+tuber_shape.rep1<-tuber_shape.rep[tuber_shape.rep$replicate == 1,]
+colnames(tuber_shape.rep1)[3:ncol(tuber_shape.rep1)]<-paste(colnames(tuber_shape.rep1)[3:ncol(tuber_shape.rep1)], "1", sep="_")
+tuber_shape.rep2<-tuber_shape.rep[tuber_shape.rep$replicate == 2,]
+colnames(tuber_shape.rep2)[3:ncol(tuber_shape.rep2)]<-paste(colnames(tuber_shape.rep2)[3:ncol(tuber_shape.rep2)], "2", sep="_")
+
+compare.reps<-merge(tuber_shape.rep1[,-c(2)], tuber_shape.rep2[,-c(2)], by=c('clone'))
+## ratio
+Ratio.rep<-cor(compare.reps[,2], compare.reps[,16], use="complete.obs")
+## eccentricity
+Eccentricity.rep<-cor(compare.reps[,3], compare.reps[,17], use="complete.obs")
+## area
+Area.rep<-cor(compare.reps[,4], compare.reps[,18], use="complete.obs")
+## length
+LengthMV.rep<-cor(compare.reps[,5], compare.reps[,19], use="complete.obs")
+## width
+WidthMV.rep<-cor(compare.reps[,6], compare.reps[,20], use="complete.obs")
+## perimeter
+cor(compare.reps[,7], compare.reps[,21], use="complete.obs")
+## weigth
+Weight.rep<-cor(compare.reps[,8], compare.reps[,22], use="complete.obs")
+## sva
+SVA.rep<-cor(compare.reps[,9], compare.reps[,23], use="complete.obs")
+## length
+LengthCal.rep<-cor(compare.reps[,10], compare.reps[,24], use="complete.obs")
+## width caliper
+WidthCal.rep<-cor(compare.reps[,11], compare.reps[,25], use="complete.obs")
+## ratio caliper
+RatioCal.rep<-cor(compare.reps[,12], compare.reps[,26], use="complete.obs")
+## PC1
+ShapePC1.rep<-cor(compare.reps[,13], compare.reps[,27], use="complete.obs")
+## PC2
+ShapePC2.rep<-cor(compare.reps[,14], compare.reps[,28], use="complete.obs")
+## PC3
+ShapePC3.rep<-cor(compare.reps[,15], compare.reps[,29], use="complete.obs")
+
+traits<-c("Weight", "Area", "Length (capliper)", "Length (MV)", "Width (caliper)", "Width (MV)", "Aspect ratio (caliper)", "Aspect ratio (MV)", "SVA", "Eccentricity", "PC1shape", "PC2shape", "PC3shape")
+R2Reps<-c(Weight.rep, Area.rep, LengthCal.rep, LengthMV.rep, WidthCal.rep, WidthMV.rep, RatioCal.rep, Ratio.rep, SVA.rep, Eccentricity.rep, ShapePC1.rep, ShapePC2.rep, ShapePC3.rep)
+
+cbind(traits, R2Reps)
+
+ex_colorPC.rep<-aggregate(.~ clone + replicate, data=ex_color.PC[,c(1,2,4:ncol(ex_color.PC))], mean)
+
+ex_colorPC.rep1<-ex_colorPC.rep[ex_colorPC.rep$replicate == 1,]
+colnames(ex_colorPC.rep1)[3:ncol(ex_colorPC.rep1)]<-paste(colnames(ex_colorPC.rep1)[3:ncol(ex_colorPC.rep1)], "1", sep="_")
+ex_colorPC.rep2<-ex_colorPC.rep[ex_colorPC.rep$replicate == 2,]
+colnames(ex_colorPC.rep2)[3:ncol(ex_colorPC.rep2)]<-paste(colnames(ex_colorPC.rep2)[3:ncol(ex_colorPC.rep2)], "2", sep="_")
+
+compare.reps.skin<-merge(ex_colorPC.rep1[,-c(2)], ex_colorPC.rep2[,-c(2)], by=c('clone'))
+PC1skin.rep<-cor(compare.reps.skin[,2], compare.reps.skin[,8], use="complete.obs")
+PC2skin.rep<-cor(compare.reps.skin[,3], compare.reps.skin[,9], use="complete.obs")
+PC3skin.rep<-cor(compare.reps.skin[,4], compare.reps.skin[,10], use="complete.obs")
+
+
+###################
+
+int_colorPC.rep<-aggregate(.~ clone + replicate, data=int_color.PC[,c(1,2,4:ncol(int_color.PC))], mean)
+
+int_colorPC.rep1<-int_colorPC.rep[int_colorPC.rep$replicate == 1,]
+colnames(int_colorPC.rep1)[3:ncol(int_colorPC.rep1)]<-paste(colnames(int_colorPC.rep1)[3:ncol(int_colorPC.rep1)], "1", sep="_")
+int_colorPC.rep2<-int_colorPC.rep[int_colorPC.rep$replicate == 2,]
+colnames(int_colorPC.rep2)[3:ncol(int_colorPC.rep2)]<-paste(colnames(int_colorPC.rep2)[3:ncol(int_colorPC.rep2)], "2", sep="_")
+
+compare.reps.flesh<-merge(int_colorPC.rep1[,-c(2)], int_colorPC.rep2[,-c(2)], by=c('clone'))
+PC1flesh.rep<-cor(compare.reps.flesh[,2], compare.reps.flesh[,8], use="complete.obs")
+PC2flesh.rep<-cor(compare.reps.flesh[,3], compare.reps.flesh[,9], use="complete.obs")
+PC3flesh.rep<-cor(compare.reps.flesh[,4], compare.reps.flesh[,10], use="complete.obs")
+
+
+traits<-c("Weight", "Area", "Length (capliper)", "Length (MV)", "Width (caliper)", "Width (MV)", "Aspect ratio (caliper)", "Aspect ratio (MV)", "SVA", "Eccentricity", "PC1.shape", "PC2.shape", "PC3.shape", "PC1.skin", "PC2.skin", "PC3.skin", "PC1.flesh", "PC2.flesh","PC3.flesh")
+R2Reps<-c(Weight.rep, Area.rep, LengthCal.rep, LengthMV.rep, WidthCal.rep, WidthMV.rep, RatioCal.rep, Ratio.rep, SVA.rep, Eccentricity.rep, ShapePC1.rep, ShapePC2.rep, ShapePC3.rep, PC1skin.rep, PC2skin.rep, PC3skin.rep, PC1flesh.rep, PC2flesh.rep, PC3flesh.rep)
+replicate_correlation<-cbind(traits, R2Reps)
+
+colnames(replicate_correlation)<-c("Trait", "r2")
+write.csv(replicate_correlation, file="ReplicateCorrelation.csv", quote=F, row.names=F)
+
